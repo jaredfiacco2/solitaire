@@ -205,16 +205,18 @@ export function EmptyPile({
                 border-2 border-dashed
                 flex items-center justify-center
                 transition-all duration-300
+                !bg-transparent !bg-none
                 ${type === 'foundation'
-                    ? 'border-[#d4a533]/40 bg-transparent'
+                    ? 'border-[#d4a533]/40'
                     : type === 'stock'
-                        ? 'border-white/10 bg-transparent cursor-pointer hover:bg-white/5 active:scale-95'
-                        : 'border-white/10 bg-transparent'}
-                ${isValidTarget ? 'border-[#d4a533]/80 bg-[#d4a533]/10 shadow-lg shadow-[#d4a533]/30 scale-105' : ''}
+                        ? 'border-white/20 cursor-pointer hover:bg-white/5 active:scale-95'
+                        : 'border-white/20'}
+                ${isValidTarget ? 'border-[#d4a533]/80 !bg-[#d4a533]/10 shadow-lg shadow-[#d4a533]/30 scale-105' : ''}
                 ${isHint ? 'ring-4 ring-[#d4a533] ring-offset-2 ring-offset-black animate-pulse shadow-[0_0_30px_rgba(212,165,51,0.6)]' : ''}
                 ${className}
             `}
             onClick={onClick}
+            style={{ backgroundColor: 'transparent', backgroundImage: 'none' }}
         >
             {type === 'foundation' && (
                 <div className="text-[#d4a533]/30 flex flex-col items-center">
