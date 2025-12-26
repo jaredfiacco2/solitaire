@@ -101,6 +101,7 @@ function constructValidDeal(drawMode: 1 | 3): GameState {
         isDealing: false,
         comboMultiplier: 1,
         lastMoveTime: null,
+        isStuck: false,
     };
 }
 
@@ -205,6 +206,7 @@ function constructReversePlayDeal(drawMode: 1 | 3): GameState {
         isDealing: false,
         comboMultiplier: 1,
         lastMoveTime: null,
+        isStuck: false,
     };
 }
 

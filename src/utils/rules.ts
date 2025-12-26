@@ -135,3 +135,45 @@ export function findValidTableauDestination(card: Card, state: GameState): numbe
     }
     return -1;
 }
+
+/**
+ * Check if there are any valid moves available
+ * Returns false when the game is stuck (no moves possible)
+ */
+export function hasAnyValidMove(state: GameState): boolean {
+    // If stock has cards, player can always draw
+    if (state.stock.length > 0) return true;
+
+    // Check waste card
+    if (state.waste.length > 0) {
+        const wasteCard = state.waste[state.waste.length - 1];
+        // Can move to foundation?
+        if (findAutoMove(wasteCard, state) !== -1) return true;
+        // Can move to tableau?
+        if (findValidTableauDestination(wasteCard, state) !== -1) return true;
+    }
+
+    // Check all tableau face-up cards
+    for (let pileIdx = 0; pileIdx < 7; pileIdx++) {
+        const pile = state.tableau[pileIdx];
+        for (let cardIdx = 0; cardIdx < pile.length; cardIdx++) {
+            const card = pile[cardIdx];
+            if (!card.faceUp) continue;
+
+            // Can move to foundation? (only top card)
+            if (cardIdx === pile.length - 1) {
+                if (findAutoMove(card, state) !== -1) return true;
+            }
+
+            // Can move to another tableau pile?
+            const destIdx = findValidTableauDestination(card, state);
+            if (destIdx !== -1 && destIdx !== pileIdx) {
+                // Valid move exists (even if it doesn't expose a new card)
+                return true;
+            }
+        }
+    }
+
+    // No valid moves found
+    return false;
+}

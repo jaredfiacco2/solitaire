@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, GameSettings, Card, PileType } from '../types/game';
-import { isGameWon, canAutoComplete, findAutoMove, findValidTableauDestination } from '../utils/rules';
+import { isGameWon, canAutoComplete, findAutoMove, findValidTableauDestination, hasAnyValidMove } from '../utils/rules';
 import { generateGuaranteedSolvableDeal } from '../utils/solver';
 import { playCardDraw, playCardPlace, playCardShuffle, playSuccess, playWinFanfare, initAudio, triggerHaptic } from '../utils/sounds';
 
@@ -148,6 +148,7 @@ export function useGameState() {
                 stock: newStock,
                 waste: [...prev.waste, ...drawnCards],
                 moves: prev.moves + 1,
+                isStuck: false, // Drawing a card may reveal new moves
             };
         });
     }, [startTimer, saveToHistory, settings.soundEnabled]);
@@ -195,6 +196,7 @@ export function useGameState() {
                     newState.lastMoveTime = now;
                     newState.isComplete = isGameWon(newState);
                     newState.canAutoComplete = canAutoComplete(newState);
+                    newState.isStuck = !newState.isComplete && !hasAnyValidMove(newState);
 
                     if (settings.soundEnabled) {
                         if (newState.isComplete) playWinFanfare();
@@ -239,6 +241,7 @@ export function useGameState() {
                 newState.comboMultiplier = newCombo;
                 newState.lastMoveTime = now;
                 newState.canAutoComplete = canAutoComplete(newState);
+                newState.isStuck = !hasAnyValidMove(newState);
 
                 if (settings.soundEnabled) {
                     playCardPlace();

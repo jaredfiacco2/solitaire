@@ -36,6 +36,7 @@ export interface GameState {
     isDealing: boolean; // True during the initial card layout animation
     comboMultiplier: number; // Multiplier for rapid moves
     lastMoveTime: number | null; // Timestamp of the last scoring move
+    isStuck: boolean; // True when no valid moves are available
 }
 
 // Move for undo/redo

@@ -235,6 +235,24 @@ function App() {
         </div>
       )}
 
+      {/* No Moves Available Notification */}
+      {state.isStuck && !state.isComplete && !state.isAutoCompleting && (
+        <div className="fixed inset-x-0 bottom-24 flex justify-center z-40 animate-fly-in">
+          <div className="flex flex-col items-center gap-4 px-8 py-5 glass rounded-[20px] border border-red-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] text-red-400 font-bold uppercase tracking-[0.2em]">Game Over</span>
+              <span className="text-lg font-serif text-white/90">No moves available</span>
+            </div>
+            <button
+              onClick={handleNewGame}
+              className="px-6 py-2.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-[#f0f0f0] transition-colors uppercase tracking-widest"
+            >
+              New Game
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Auto-Finish Prompt - Premium UX */}
       {state.canAutoComplete && !state.isAutoCompleting && !state.isComplete && (
         <div className="fixed inset-x-0 bottom-24 flex justify-center z-40 animate-fly-in">
