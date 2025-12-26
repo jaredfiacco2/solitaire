@@ -1,4 +1,4 @@
-import type { Card as CardType } from '../../types/game';
+import type { Card as CardType, Suit } from '../../types/game';
 import { Card, EmptyPile } from './Card';
 
 interface FoundationProps {
@@ -7,7 +7,7 @@ interface FoundationProps {
     validDropTargets?: number[];
 }
 
-const SUIT_HINTS = ['♠', '♥', '♣', '♦'];
+const SUIT_HINTS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds'];
 
 export function Foundation({
     piles,
@@ -15,7 +15,7 @@ export function Foundation({
     validDropTargets = [],
 }: FoundationProps) {
     return (
-        <div className="flex gap-1 sm:gap-2 lg:gap-3">
+        <div className="flex gap-1 sm:gap-2">
             {piles.map((pile, index) => (
                 <div key={index} className="relative">
                     {pile.length === 0 ? (
@@ -31,9 +31,9 @@ export function Foundation({
                                 onClick={() => onCardClick?.(pile[pile.length - 1], index)}
                                 isTopCard
                             />
-                            {/* Card count badge */}
+                            {/* Card count badge - Premium gold style */}
                             {pile.length > 1 && (
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-emerald-600 text-white text-[10px] sm:text-xs font-bold rounded-full flex items-center justify-center shadow-lg border border-emerald-400/50">
+                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#d4a533] text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border border-white/20">
                                     {pile.length}
                                 </div>
                             )}

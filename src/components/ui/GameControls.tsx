@@ -8,6 +8,8 @@ interface GameControlsProps {
     onNewGame: () => void;
     onToggleDrawMode: () => void;
     onHint: () => void;
+    onUndo: () => void;
+    canUndo: boolean;
     isComplete: boolean;
     canAutoComplete: boolean;
     onAutoComplete: () => void;
@@ -22,6 +24,8 @@ export function GameControls({
     onNewGame,
     onToggleDrawMode,
     onHint,
+    onUndo,
+    canUndo,
     isComplete,
     canAutoComplete,
     onAutoComplete,
@@ -50,60 +54,72 @@ export function GameControls({
     };
 
     return (
-        <header className="glass border-b border-white/10 px-2 sm:px-4 py-2">
+        <header className="glass border-b border-white/[0.06] px-2 sm:px-4 py-2.5">
             <div className="flex items-center justify-between max-w-4xl mx-auto gap-2">
                 {/* Stats Row */}
                 <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                    {/* Score - prominent */}
-                    <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30">
-                        <span className="text-amber-400 font-bold tabular-nums">{score}</span>
-                        <span className="text-amber-400/60 text-[10px] hidden sm:inline">pts</span>
+                    {/* Score - premium gold styling */}
+                    <div className="score-display flex items-center gap-1.5">
+                        <span className="score-value text-base sm:text-lg tabular-nums">{score}</span>
+                        <span className="text-[#d4a533]/50 text-[10px] hidden sm:inline uppercase tracking-wider">pts</span>
                     </div>
 
                     {/* Timer */}
-                    <div className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="font-mono text-white/80 tabular-nums">{formatTime(elapsed)}</span>
+                        <span className="font-mono text-white/70 tabular-nums">{formatTime(elapsed)}</span>
                     </div>
 
                     {/* Moves */}
-                    <div className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                         </svg>
-                        <span className="font-mono text-white/80 tabular-nums">{moves}</span>
+                        <span className="font-mono text-white/70 tabular-nums">{moves}</span>
                     </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    {/* Hint Button */}
+                    {/* Undo Button */}
                     <button
-                        onClick={onHint}
-                        className="p-2 text-yellow-400/80 bg-yellow-500/10 rounded-lg border border-yellow-500/20 hover:bg-yellow-500/20 active:scale-95 transition-all"
-                        title="Get Hint"
+                        onClick={onUndo}
+                        disabled={!canUndo}
+                        className={`btn-premium btn-subtle p-2 rounded-lg ${!canUndo ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        title="Undo"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                         </svg>
                     </button>
 
-                    {/* Auto-complete Button - shows when available */}
+                    {/* Hint Button */}
+                    <button
+                        onClick={onHint}
+                        className="btn-premium p-2 rounded-lg bg-[#d4a533]/10 border border-[#d4a533]/20 text-[#d4a533]/80 hover:bg-[#d4a533]/15"
+                        title="Get Hint"
+                    >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </button>
+
+                    {/* Auto-complete Button */}
                     {canAutoComplete && !isComplete && (
                         <button
                             onClick={onAutoComplete}
-                            className="px-2 py-1.5 sm:px-3 text-xs sm:text-sm font-medium text-emerald-400 bg-emerald-500/20 rounded-lg border border-emerald-500/30 hover:bg-emerald-500/30 active:scale-95 transition-all animate-pulse"
+                            className="btn-premium px-2 py-1.5 sm:px-3 text-xs sm:text-sm font-medium text-[#d4a533] bg-[#d4a533]/15 rounded-lg border border-[#d4a533]/25 hover:bg-[#d4a533]/20"
                         >
-                            <span className="hidden sm:inline">Auto</span> Finish
+                            <span className="hidden sm:inline">Auto </span>Finish
                         </button>
                     )}
 
                     {/* Draw mode toggle */}
                     <button
                         onClick={onToggleDrawMode}
-                        className="px-2 py-1.5 sm:px-2.5 text-xs font-medium text-white/70 bg-white/10 rounded-lg border border-white/10 hover:bg-white/20 active:scale-95 transition-all"
+                        className="btn-premium btn-subtle px-2 py-1.5 sm:px-2.5 text-xs font-medium rounded-lg"
                     >
                         Draw {drawMode}
                     </button>
@@ -111,7 +127,7 @@ export function GameControls({
                     {/* New Game */}
                     <button
                         onClick={onNewGame}
-                        className="px-2.5 py-1.5 sm:px-3 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-lg hover:from-emerald-500 hover:to-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-900/30"
+                        className="btn-premium btn-gold px-2.5 py-1.5 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg"
                     >
                         New
                     </button>
@@ -120,3 +136,4 @@ export function GameControls({
         </header>
     );
 }
+

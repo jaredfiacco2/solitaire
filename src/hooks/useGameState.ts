@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, GameSettings, Card, PileType } from '../types/game';
 import { createDeck, shuffleDeck } from '../utils/deck';
 import { isGameWon, canAutoComplete, findAutoMove, findValidTableauDestination } from '../utils/rules';
+import { generateWinnableDeal } from '../utils/solver';
 import { playCardDraw, playCardPlace, playCardShuffle, playSuccess, playWinFanfare, initAudio } from '../utils/sounds';
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -25,7 +26,7 @@ const POINTS = {
     TIME_BONUS_MULTIPLIER: 700000, // For calculating time bonus
 };
 
-function createInitialState(drawMode: 1 | 3): GameState {
+function createRandomState(drawMode: 1 | 3): GameState {
     const deck = shuffleDeck(createDeck());
 
     // Deal tableau (7 piles, increasing cards)
@@ -55,6 +56,10 @@ function createInitialState(drawMode: 1 | 3): GameState {
         canAutoComplete: false,
         isAutoCompleting: false,
     };
+}
+
+function createInitialState(drawMode: 1 | 3): GameState {
+    return generateWinnableDeal(createRandomState, drawMode);
 }
 
 function loadSavedState(): GameState | null {
@@ -91,6 +96,13 @@ export function useGameState() {
 
     const [hintCard, setHintCard] = useState<{ cardId: string; destination: string } | null>(null);
     const autoCompleteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [history, setHistory] = useState<GameState[]>([]);
+    const MAX_UNDO = 20;
+
+    // Save current state to history before making changes
+    const saveToHistory = useCallback((currentState: GameState) => {
+        setHistory(prev => [...prev.slice(-MAX_UNDO + 1), currentState]);
+    }, []);
 
     // Save settings
     useEffect(() => {
@@ -131,6 +143,9 @@ export function useGameState() {
         setHintCard(null);
 
         setState(prev => {
+            // Save to history before making changes
+            saveToHistory(prev);
+
             if (prev.stock.length === 0) {
                 if (prev.waste.length === 0) return prev;
 
@@ -159,13 +174,15 @@ export function useGameState() {
                 moves: prev.moves + 1,
             };
         });
-    }, [startTimer]);
+    }, [startTimer, saveToHistory]);
 
     // Smart move with scoring
     const smartMove = useCallback((card: Card, fromType: PileType, fromIndex: number, cardsToMove?: Card[]) => {
         setHintCard(null);
 
         setState(prev => {
+            // Save to history before making changes
+            saveToHistory(prev);
             // Try foundation first (single cards only)
             if (!cardsToMove || cardsToMove.length === 1) {
                 const foundationIndex = findAutoMove(card, prev);
@@ -214,7 +231,9 @@ export function useGameState() {
 
             // Try tableau
             const tableauIndex = findValidTableauDestination(card, prev);
-            if (tableauIndex !== -1 && tableauIndex !== fromIndex) {
+            // Only skip if moving within same tableau pile (fromType === 'tableau' AND same index)
+            const isSamePile = fromType === 'tableau' && tableauIndex === fromIndex;
+            if (tableauIndex !== -1 && !isSamePile) {
                 startTimer();
                 const cards = cardsToMove || [card];
                 const newState = { ...prev };
@@ -386,15 +405,25 @@ export function useGameState() {
         }
     }, [hintCard]);
 
+    // Undo last action
+    const undo = useCallback(() => {
+        if (history.length === 0) return;
+        const previousState = history[history.length - 1];
+        setHistory(prev => prev.slice(0, -1));
+        setState(previousState);
+    }, [history]);
+
     return {
         state,
         settings,
         hintCard,
+        canUndo: history.length > 0,
         drawFromStock,
         smartMove,
         findHint,
         startAutoComplete,
         newGame,
         updateSettings,
+        undo,
     };
 }
