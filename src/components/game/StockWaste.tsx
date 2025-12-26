@@ -28,27 +28,26 @@ export function StockWaste({
 
     return (
         <div className="flex gap-4 sm:gap-8">
-            {/* Imperial Stock Pillar */}
+            {/* Standard Stock Pile */}
             <div className="relative group">
                 {stock.length === 0 ? (
                     <EmptyPile type="stock" onClick={onStockClick} isHint={isStockHint} />
                 ) : (
                     <div
                         onClick={onStockClick}
-                        className={`cursor-pointer relative transition-transform duration-300 hover:translate-y-[-2px] active:translate-y-[1px] ${isStockHint ? 'animate-pulse' : ''} ${isDealing ? 'animate-fly-in' : ''}`}
-                        style={{ animationDelay: isDealing ? '0s' : undefined }}
+                        className={`cursor-pointer relative transition-transform duration-200 active:translate-y-[1px] ${isStockHint ? 'animate-pulse' : ''} ${isDealing ? 'animate-fly-in' : ''}`}
                     >
-                        {/* Stack Materiality */}
+                        {/* Stack Materiality - Simple Borders */}
                         {stock.length > 2 && (
-                            <div className="absolute left-[3px] top-[3px] w-full h-full rounded-[8px] bg-[#121218] border border-white/5 opacity-40 shadow-sm" />
+                            <div className="absolute left-[2px] top-[2px] w-full h-full rounded-[6px] bg-white border border-black/10" />
                         )}
                         {stock.length > 1 && (
-                            <div className="absolute left-[1.5px] top-[1.5px] w-full h-full rounded-[8px] bg-[#1a1a24] border border-white/5 opacity-60 shadow-sm" />
+                            <div className="absolute left-[1px] top-[1px] w-full h-full rounded-[6px] bg-white border border-black/10" />
                         )}
                         <Card card={stock[stock.length - 1]} isTopCard isHint={isStockHint} />
 
-                        {/* Imperial Count Badge */}
-                        <div className="absolute -bottom-2 -right-2 min-w-[24px] h-6 px-1.5 bg-gradient-to-br from-[#d4a533] via-[#ffd700] to-[#b8860b] text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(212,165,51,0.3)] border border-white/20 select-none">
+                        {/* Standard Count Badge */}
+                        <div className="absolute -bottom-2 -right-2 min-w-[20px] h-5 px-1 bg-black/80 text-white text-[10px] font-bold rounded flex items-center justify-center border border-white/20 select-none">
                             {stock.length}
                         </div>
                     </div>
@@ -56,22 +55,23 @@ export function StockWaste({
             </div>
 
             {/* Imperial Waste Trail */}
-            <div className="relative" style={{ minWidth: 'var(--card-width-mobile)' }}>
+            <div className="relative" style={{ minWidth: 'var(--card-width)' }}>
                 {visibleWaste.length === 0 ? (
-                    <div className="w-[var(--card-width-mobile)] h-[calc(var(--card-width-mobile)*1.4)] rounded-[8px] border border-white/5 bg-white/2 opacity-20" />
+                    <div className="w-[var(--card-width)] h-[var(--card-height)] rounded-[var(--card-radius)] border border-white/5 bg-white/2 opacity-20" />
                 ) : (
                     <div className="relative">
                         {visibleWaste.map((card, idx) => {
                             const isLast = idx === visibleWaste.length - 1;
-                            const offset = drawMode === 3 ? idx * 22 : 0;
+                            const offset = drawMode === 3 ? idx : 0;
 
                             return (
                                 <div
                                     key={card.id}
-                                    className="absolute top-0 transition-all duration-300"
+                                    className="absolute top-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                                     style={{
-                                        left: offset,
+                                        left: `calc(${offset} * var(--waste-offset))`,
                                         zIndex: idx,
+                                        willChange: 'transform, left'
                                     }}
                                 >
                                     <div className={isLast ? 'relative' : 'opacity-80 scale-95 origin-left'}>

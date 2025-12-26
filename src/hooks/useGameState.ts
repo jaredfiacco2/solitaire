@@ -419,13 +419,13 @@ export function useGameState() {
         state,
         settings,
         hintCard,
-        canUndo: history.length > 0,
+        canUndo: undoStack.length > 0,
         drawFromStock,
         smartMove,
-        findHint,
-        startAutoComplete,
-        newGame,
-        updateSettings,
         undo,
+        newGame: () => dispatch({ type: 'NEW_GAME' }),
+        updateSettings: (newSettings: Partial<GameSettings>) =>
+            dispatch({ type: 'UPDATE_SETTINGS', settings: newSettings }),
+        dispatch // Expose dispatch for custom actions like AUTO_COMPLETE
     };
 }

@@ -146,61 +146,11 @@ export function playUndo(): void {
         // Audio not available
     }
 }
-// Ambient Room Tone - Persistent low-frequency atmosphere
-let ambientContext: AudioContext | null = null;
-let ambientSource: AudioBufferSourceNode | null = null;
-let ambientGain: GainNode | null = null;
-
+// Ambient Room Tone - Removed per user request ("fan noise")
 export function startAmbient(): void {
-    if (ambientContext || ambientSource) return;
-
-    try {
-        ambientContext = new AudioContext();
-
-        // Create brown noise for "felt" texture
-        const bufferSize = ambientContext.sampleRate * 2;
-        const buffer = ambientContext.createBuffer(1, bufferSize, ambientContext.sampleRate);
-        const data = buffer.getChannelData(0);
-        let lastOut = 0;
-
-        for (let i = 0; i < bufferSize; i++) {
-            const white = Math.random() * 2 - 1;
-            lastOut = (lastOut + (0.02 * white)) / 1.02;
-            data[i] = lastOut * 3.5; // Brown noise approximation
-        }
-
-        ambientSource = ambientContext.createBufferSource();
-        ambientSource.buffer = buffer;
-        ambientSource.loop = true;
-
-        const filter = ambientContext.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(400, ambientContext.currentTime);
-        filter.Q.setValueAtTime(1, ambientContext.currentTime);
-
-        ambientGain = ambientContext.createGain();
-        ambientGain.gain.setValueAtTime(0, ambientContext.currentTime);
-        // Fade in gracefully
-        ambientGain.gain.linearRampToValueAtTime(0.04, ambientContext.currentTime + 1.5);
-
-        ambientSource.connect(filter);
-        filter.connect(ambientGain);
-        ambientGain.connect(ambientContext.destination);
-
-        ambientSource.start();
-    } catch {
-        // Audio not available
-    }
+    // No-op
 }
 
 export function stopAmbient(): void {
-    if (ambientGain && ambientContext) {
-        ambientGain.gain.linearRampToValueAtTime(0, ambientContext.currentTime + 0.5);
-        setTimeout(() => {
-            ambientSource?.stop();
-            ambientSource = null;
-            ambientContext?.close();
-            ambientContext = null;
-        }, 600);
-    }
+    // No-op
 }

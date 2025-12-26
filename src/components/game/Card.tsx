@@ -28,13 +28,15 @@ const SuitIcon = ({ suit, className = "" }: { suit: Suit, className?: string }) 
         case 'clubs':
             return (
                 <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2.1 3.5 1.7.3 3.1 1.6 3.1 3.5 0 2.2-1.8 4-4 4-1.1 0-2.1-.4-2.8-1.2L9 19.5v-2c0-.3.1-.5.3-.7l.7-.7c.3-.3.3-.8 0-1.1s-.8-.3-1.1 0l-.7.7c-.2.2-.4.3-.7.3h-2c-.5 0-1-.4-1-1s.4-1 1-1h2c.3 0 .5-.1.7-.3l.7-.7c.3-.3.3-.8 0-1.1s-.8-.3-1.1 0l-.7.7c-.2.2-.4.3-.7.3h-2C4.1 16 3 14.9 3 13.5c0-1.9 1.4-3.2 3.1-3.5-1.3-.7-2.1-2.1-2.1-3.5 0-2.2 1.8-4 4-4s4 1.8 4 4c0 .3 0 .7-.1 1H12V2zm0 15v3h1v-3h-1z" />
+                    <path d="M12 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-3.5 11c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-2.5-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    <path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm4.5 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-9 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
                 </svg>
             );
         case 'spades':
             return (
                 <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 2C9 2 4 10 4 13c0 2.2 1.8 4 4 4s4-1.8 4-4v-1h.1c0 2.2 1.8 4 4 4s4-1.8 4-4c0-3-5-11-8-11zm0 15v3h1v-3h-1z" />
+                    <path d="M12 2C9 2 4 9 4 12c0 3 2 5 5 5 2 0 3-1 3-1s1 1 3 1c3 0 5-2 5-5 0-3-5-10-8-10z" />
+                    <path d="M12 16v5h-2v-5h2z" />
                 </svg>
             );
         default:
@@ -137,7 +139,8 @@ export function Card({
                 style={{
                     WebkitTouchCallout: 'none',
                     WebkitUserSelect: 'none',
-                    transform: isTopCard ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined
+                    transform: isTopCard ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined,
+                    transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
                 } as React.CSSProperties}
             >
                 {/* Invisible interaction layer */}
@@ -149,29 +152,32 @@ export function Card({
 
                 <div className="absolute inset-0 p-1 sm:p-1.5 pointer-events-none select-none">
                     {/* Top left metadata */}
-                    <div className={`absolute top-1 left-1.5 sm:top-1.5 sm:left-2 leading-none ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
-                        <div className="text-xs sm:text-sm lg:text-[1.1rem] font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>{rank}</div>
-                        <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4.5 sm:h-4.5 mt-0.5" />
+                    <div className={`absolute top-1 left-1.5 leading-none ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'} flex flex-col items-center`}>
+                        <div className="text-base sm:text-xl font-bold tracking-tight">{rank}</div>
+                        <SuitIcon suit={card.suit} className="w-3.5 h-3.5 mt-0.5" />
                     </div>
 
-                    {/* Center focus suit - physical etching style */}
-                    <div className={`absolute inset-0 flex items-center justify-center ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
-                        <SuitIcon suit={card.suit} className="w-7 h-7 sm:w-11 sm:h-11 lg:w-14 lg:h-14 opacity-[0.88] drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" />
+                    {/* Center focus - Simple Regular Card Pip */}
+                    <div className={`absolute inset-0 flex items-center justify-center ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'}`}>
+                        <SuitIcon suit={card.suit} className="w-10 h-10 sm:w-16 sm:h-16 opacity-90" />
                     </div>
 
                     {/* Bottom right metadata */}
-                    <div className={`absolute bottom-1 right-1.5 sm:bottom-1.5 sm:right-2 leading-none rotate-180 ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
-                        <div className="text-xs sm:text-sm lg:text-[1.1rem] font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>{rank}</div>
-                        <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4.5 sm:h-4.5 mt-0.5" />
+                    <div className={`absolute bottom-1 right-1.5 leading-none rotate-180 ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'} flex flex-col items-center`}>
+                        <div className="text-base sm:text-xl font-bold tracking-tight">{rank}</div>
+                        <SuitIcon suit={card.suit} className="w-3.5 h-3.5 mt-0.5" />
                     </div>
                 </div>
 
                 {/* Premium Gold/Silver inner frame (Very subtle) */}
-                <div className="absolute inset-[3px] rounded-[7px] border border-black/5 pointer-events-none opacity-40" />
+                <div className="absolute inset-[3px] rounded-[6px] border border-black/5 pointer-events-none opacity-40" />
 
-                {/* Hint aura */}
+                {/* Enhanced Hint aura - Maximum visibility */}
                 {isHint && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#d4a533]/5 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 z-20 pointer-events-none">
+                        <div className="absolute inset-0 bg-[#d4a533]/30 animate-pulse rounded-[var(--card-radius)]" />
+                        <div className="absolute inset-[-4px] border-2 border-[#d4a533] rounded-[12px] animate-bounce shadow-[0_0_15px_rgba(212,165,51,0.6)]" />
+                    </div>
                 )}
             </div>
         </div>

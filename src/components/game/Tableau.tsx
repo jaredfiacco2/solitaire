@@ -36,19 +36,17 @@ export function Tableau({
                                 const isTopCard = cardIndex === pile.length - 1;
                                 const canInteract = card.faceUp;
 
-                                const faceDownOffset = 6;
-                                const faceUpOffset = 18;
-                                const offset = cardIndex === 0 ? 0 :
-                                    (card.faceUp ? faceUpOffset : faceDownOffset);
+                                const offsetVar = card.faceUp ? 'var(--tableau-offset-up)' : 'var(--tableau-offset-down)';
 
                                 return (
                                     <div
                                         key={card.id}
-                                        className={`relative ${isDealing ? 'animate-fly-in' : ''}`}
+                                        className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDealing ? 'animate-fly-in' : ''}`}
                                         style={{
-                                            marginTop: cardIndex === 0 ? 0 : `-${66 - offset}px`,
+                                            marginTop: cardIndex === 0 ? 0 : `calc(-1 * (var(--card-height) - ${offsetVar}))`,
                                             zIndex: cardIndex,
-                                            animationDelay: isDealing ? `${(pileIndex * 0.1) + (cardIndex * 0.05)}s` : undefined,
+                                            animationDelay: isDealing ? `${(pileIndex * 0.08) + (cardIndex * 0.04)}s` : undefined,
+                                            willChange: 'transform, margin-top'
                                         }}
                                     >
                                         <Card

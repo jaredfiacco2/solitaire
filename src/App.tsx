@@ -11,6 +11,7 @@ import { StatsPanel } from './components/ui/StatsPanel';
 import { SettingsPanel } from './components/ui/SettingsPanel';
 import { startAmbient, stopAmbient } from './utils/sounds';
 import type { Card as CardType } from './types/game';
+import { HandMetal, HelpCircle, RotateCcw, SkipForward, CheckCircle2 } from 'lucide-react';
 
 function App() {
   const {
@@ -25,6 +26,7 @@ function App() {
     newGame,
     updateSettings,
     undo,
+    dispatch, // Added dispatch from useGameState
   } = useGameState();
 
   const { isMobile, isLandscape } = useResponsive();
@@ -164,11 +166,8 @@ function App() {
           <StockWaste
             stock={state.stock}
             waste={state.waste}
-            drawMode={state.drawMode}
             onStockClick={drawFromStock}
-            onWasteCardClick={(card) => handleCardTap(card, 'waste', 0)}
-            onWasteCardDoubleClick={(card) => handleCardTap(card, 'waste', 0)}
-            isHintCard={isHintCard}
+            onWasteClick={(card) => handleCardTap(card, 'waste', 0)}
             isStockHint={hintCard?.cardId === 'stock'}
             isDealing={state.isDealing}
           />
@@ -183,19 +182,26 @@ function App() {
         <div className={`flex-1 flex items-start justify-center overflow-y-auto smooth-scroll pb-8 ${isMobile ? 'mobile-compact-tableau' : ''}`}>
           <Tableau
             piles={state.tableau}
-            onCardClick={(card, pileIndex, cardIndex) => {
-              const cardsToMove = state.tableau[pileIndex].slice(cardIndex);
-              handleCardTap(card, 'tableau', pileIndex, cardsToMove);
-            }}
-            onCardDoubleClick={(card, pileIndex, cardIndex) => {
-              const cardsToMove = state.tableau[pileIndex].slice(cardIndex);
-              handleCardTap(card, 'tableau', pileIndex, cardsToMove);
-            }}
+            onCardClick={handleCardTap}
             isHintCard={isHintCard}
             isDealing={state.isDealing}
           />
         </div>
       </main>
+
+      {/* Auto-Finish suggestions */}
+      {state.canAutoComplete && !state.isGameOver && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <button
+            onClick={() => dispatch({ type: 'AUTO_COMPLETE' })}
+            className="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-900/40 border border-white/20 font-bold transition-all active:scale-95 group"
+          >
+            <CheckCircle2 className="w-5 h-5" />
+            <span>Auto-Finish</span>
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping" />
+          </button>
+        </div>
+      )}
 
       {/* Precision Hud Controls (Bottom) */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-30">
@@ -228,6 +234,27 @@ function App() {
             <div className="w-4 h-4 border-[2.5px] border-[#d4a533] border-t-transparent rounded-full animate-spin" />
             Auto-resolution in progress
           </div>
+        </div>
+      )}
+
+      {/* Auto-Finish Prompt - Premium UX */}
+      {state.canAutoComplete && !state.isAutoCompleting && !state.isComplete && (
+        <div className="fixed inset-x-0 bottom-24 flex justify-center z-40 animate-fly-in">
+          <button
+            onClick={startAutoComplete}
+            className="group relative flex items-center gap-4 px-8 py-4 glass rounded-[20px] border border-[#d4a533]/30 shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-95 transition-all hover:border-[#d4a533]/60"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#d4a533]/5 via-transparent to-[#d4a533]/5 rounded-inherit group-hover:opacity-100 opacity-0 transition-opacity" />
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] text-[#d4a533] font-bold uppercase tracking-[0.2em]">Victory paths visible</span>
+              <span className="text-lg font-serif text-white/90">Auto-finish game?</span>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-[#d4a533] flex items-center justify-center text-black shadow-lg shadow-[#d4a533]/20 group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </button>
         </div>
       )}
 
