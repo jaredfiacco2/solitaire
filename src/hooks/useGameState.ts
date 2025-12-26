@@ -1,8 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, GameSettings, Card, PileType } from '../types/game';
-import { createDeck, shuffleDeck } from '../utils/deck';
 import { isGameWon, canAutoComplete, findAutoMove, findValidTableauDestination } from '../utils/rules';
-import { generateWinnableDeal } from '../utils/solver';
+import { generateGuaranteedSolvableDeal } from '../utils/solver';
 import { playCardDraw, playCardPlace, playCardShuffle, playSuccess, playWinFanfare, initAudio, triggerHaptic } from '../utils/sounds';
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -27,43 +26,8 @@ const POINTS = {
     TIME_BONUS_MULTIPLIER: 700000, // For calculating time bonus
 };
 
-function createRandomState(drawMode: 1 | 3): GameState {
-    const deck = shuffleDeck(createDeck());
-
-    // Deal tableau (7 piles, increasing cards)
-    const tableau: GameState['tableau'] = [[], [], [], [], [], [], []];
-    let cardIndex = 0;
-
-    for (let col = 0; col < 7; col++) {
-        for (let row = 0; row <= col; row++) {
-            const card = { ...deck[cardIndex++] };
-            card.faceUp = row === col;
-            tableau[col].push(card);
-        }
-    }
-
-    const stock = deck.slice(cardIndex).map(c => ({ ...c, faceUp: false }));
-
-    return {
-        stock,
-        waste: [],
-        foundations: [[], [], [], []],
-        tableau,
-        drawMode,
-        moves: 0,
-        score: 0,
-        startTime: null,
-        isComplete: false,
-        canAutoComplete: false,
-        isAutoCompleting: false,
-        isDealing: false,
-        comboMultiplier: 1,
-        lastMoveTime: null,
-    };
-}
-
 function createInitialState(drawMode: 1 | 3): GameState {
-    return generateWinnableDeal(createRandomState, drawMode);
+    return generateGuaranteedSolvableDeal(drawMode);
 }
 
 function loadSavedState(): GameState | null {
