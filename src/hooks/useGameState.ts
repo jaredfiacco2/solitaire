@@ -3,7 +3,7 @@ import type { GameState, GameSettings, Card, PileType } from '../types/game';
 import { createDeck, shuffleDeck } from '../utils/deck';
 import { isGameWon, canAutoComplete, findAutoMove, findValidTableauDestination } from '../utils/rules';
 import { generateWinnableDeal } from '../utils/solver';
-import { playCardDraw, playCardPlace, playCardShuffle, playSuccess, playWinFanfare, initAudio } from '../utils/sounds';
+import { playCardDraw, playCardPlace, playCardShuffle, playSuccess, playWinFanfare, initAudio, triggerHaptic } from '../utils/sounds';
 
 const DEFAULT_SETTINGS: GameSettings = {
     drawMode: 1,
@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: GameSettings = {
     hapticEnabled: true,
     autoComplete: true,
     cardSize: 'normal',
+    tableTheme: 'midnight',
 };
 
 const GAME_STATE_KEY = 'solitaire-game-state';
@@ -55,6 +56,9 @@ function createRandomState(drawMode: 1 | 3): GameState {
         isComplete: false,
         canAutoComplete: false,
         isAutoCompleting: false,
+        isDealing: false,
+        comboMultiplier: 1,
+        lastMoveTime: null,
     };
 }
 
@@ -83,7 +87,15 @@ function loadSavedState(): GameState | null {
 export function useGameState() {
     const [settings, setSettings] = useState<GameSettings>(() => {
         const saved = localStorage.getItem(SETTINGS_KEY);
-        return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Migration for tableTheme
+            if (parsed.tableTheme === undefined) {
+                parsed.tableTheme = 'midnight';
+            }
+            return { ...DEFAULT_SETTINGS, ...parsed };
+        }
+        return DEFAULT_SETTINGS;
     });
 
     const [state, setState] = useState<GameState>(() => {
@@ -181,48 +193,49 @@ export function useGameState() {
         setHintCard(null);
 
         setState(prev => {
-            // Save to history before making changes
             saveToHistory(prev);
+
+            const now = Date.now();
+            const timeSinceLast = prev.lastMoveTime ? (now - prev.lastMoveTime) / 1000 : 999;
+            const newCombo = timeSinceLast < 2.5 ? Math.min(prev.comboMultiplier + 1, 8) : 1;
+
             // Try foundation first (single cards only)
             if (!cardsToMove || cardsToMove.length === 1) {
                 const foundationIndex = findAutoMove(card, prev);
                 if (foundationIndex !== -1) {
                     startTimer();
                     const newState = { ...prev };
-                    let pointsEarned = 0;
+                    let points = 0;
 
-                    // Remove from source
                     if (fromType === 'waste') {
                         newState.waste = prev.waste.slice(0, -1);
-                        pointsEarned = POINTS.WASTE_TO_FOUNDATION;
+                        points = POINTS.WASTE_TO_FOUNDATION;
                     } else if (fromType === 'tableau') {
                         const pile = [...prev.tableau[fromIndex]];
                         pile.pop();
                         newState.tableau = [...prev.tableau];
                         newState.tableau[fromIndex] = pile;
-                        pointsEarned = POINTS.TABLEAU_TO_FOUNDATION;
+                        points = POINTS.TABLEAU_TO_FOUNDATION;
 
-                        // Flip top card - bonus points
                         if (pile.length > 0 && !pile[pile.length - 1].faceUp) {
                             pile[pile.length - 1] = { ...pile[pile.length - 1], faceUp: true };
-                            pointsEarned += POINTS.FLIP_CARD;
+                            points += POINTS.FLIP_CARD;
                         }
                     }
 
                     newState.foundations = [...prev.foundations];
                     newState.foundations[foundationIndex] = [...prev.foundations[foundationIndex], { ...card }];
                     newState.moves = prev.moves + 1;
-                    newState.score = prev.score + pointsEarned;
+                    newState.score = prev.score + (points * newCombo);
+                    newState.comboMultiplier = newCombo;
+                    newState.lastMoveTime = now;
                     newState.isComplete = isGameWon(newState);
                     newState.canAutoComplete = canAutoComplete(newState);
 
-                    // Play success sound for foundation
                     if (settings.soundEnabled) {
-                        if (newState.isComplete) {
-                            playWinFanfare();
-                        } else {
-                            playSuccess();
-                        }
+                        if (newState.isComplete) playWinFanfare();
+                        else playSuccess();
+                        if (settings.hapticEnabled) triggerHaptic(newState.isComplete ? 'success' : 'medium');
                     }
 
                     return newState;
@@ -237,11 +250,11 @@ export function useGameState() {
                 startTimer();
                 const cards = cardsToMove || [card];
                 const newState = { ...prev };
-                let pointsEarned = 0;
+                let points = 0;
 
                 if (fromType === 'waste') {
                     newState.waste = prev.waste.slice(0, -1);
-                    pointsEarned = POINTS.WASTE_TO_TABLEAU;
+                    points = POINTS.WASTE_TO_TABLEAU;
                 } else if (fromType === 'tableau') {
                     const pile = [...prev.tableau[fromIndex]];
                     const cardIdx = pile.findIndex(c => c.id === card.id);
@@ -251,24 +264,29 @@ export function useGameState() {
                     const newPile = newState.tableau[fromIndex];
                     if (newPile.length > 0 && !newPile[newPile.length - 1].faceUp) {
                         newPile[newPile.length - 1] = { ...newPile[newPile.length - 1], faceUp: true };
-                        pointsEarned = POINTS.FLIP_CARD;
+                        points = POINTS.FLIP_CARD;
                     }
                 }
 
                 newState.tableau = [...(newState.tableau || prev.tableau)];
                 newState.tableau[tableauIndex] = [...(newState.tableau[tableauIndex] || prev.tableau[tableauIndex]), ...cards];
                 newState.moves = prev.moves + 1;
-                newState.score = prev.score + pointsEarned;
+                newState.score = prev.score + (points * newCombo);
+                newState.comboMultiplier = newCombo;
+                newState.lastMoveTime = now;
                 newState.canAutoComplete = canAutoComplete(newState);
 
-                if (settings.soundEnabled) playCardPlace(); // Place sound for tableau move
+                if (settings.soundEnabled) {
+                    playCardPlace();
+                    if (settings.hapticEnabled) triggerHaptic('light');
+                }
 
                 return newState;
             }
 
-            return prev;
+            return { ...prev, comboMultiplier: 1, lastMoveTime: now };
         });
-    }, [startTimer]);
+    }, [startTimer, settings]);
 
     // Find hint - suggests best move
     const findHint = useCallback(() => {
@@ -386,12 +404,25 @@ export function useGameState() {
     const newGame = useCallback(() => {
         if (autoCompleteRef.current) {
             clearTimeout(autoCompleteRef.current);
+            autoCompleteRef.current = null;
         }
         const newState = createInitialState(settings.drawMode);
+        newState.isDealing = true;
         setState(newState);
+        setHistory([]);
         setHintCard(null);
         localStorage.removeItem(GAME_STATE_KEY);
-    }, [settings.drawMode]);
+
+        // Transition out of dealing mode after animations
+        setTimeout(() => {
+            setState(prev => ({ ...prev, isDealing: false }));
+        }, 1500);
+
+        if (settings.soundEnabled) {
+            playCardShuffle();
+            if (settings.hapticEnabled) triggerHaptic('medium');
+        }
+    }, [settings.drawMode, settings.soundEnabled, settings.hapticEnabled]);
 
     const updateSettings = useCallback((newSettings: Partial<GameSettings>) => {
         setSettings(prev => ({ ...prev, ...newSettings }));
@@ -407,11 +438,18 @@ export function useGameState() {
 
     // Undo last action
     const undo = useCallback(() => {
-        if (history.length === 0) return;
+        if (history.length === 0 || state.isAutoCompleting) return;
+
+        // Stop any active auto-complete
+        if (autoCompleteRef.current) {
+            clearTimeout(autoCompleteRef.current);
+            autoCompleteRef.current = null;
+        }
+
         const previousState = history[history.length - 1];
         setHistory(prev => prev.slice(0, -1));
-        setState(previousState);
-    }, [history]);
+        setState({ ...previousState, isAutoCompleting: false });
+    }, [history, state.isAutoCompleting]);
 
     return {
         state,

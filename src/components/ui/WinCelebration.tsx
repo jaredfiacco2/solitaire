@@ -19,11 +19,9 @@ interface Particle {
 }
 
 const COLORS = [
-    '#d4a533', '#ffd700', // Gold tones
-    '#1a237e', '#3949ab', // Navy tones
-    '#c41e3a', // Card red
-    '#ffffff', // White
-    '#b8860b', // Dark gold
+    '#d4a533', '#ffd700', // Imperial Gold
+    '#ffffff', // Silver
+    '#c4151c', // Royal Red
 ];
 
 export function WinCelebration({ onNewGame, time, moves, score }: WinCelebrationProps) {
@@ -33,43 +31,29 @@ export function WinCelebration({ onNewGame, time, moves, score }: WinCelebration
     const particles = useMemo(() => {
         const result: Particle[] = [];
 
-        // Confetti particles
-        for (let i = 0; i < 80; i++) {
+        // Luxury Confetti
+        for (let i = 0; i < 60; i++) {
             result.push({
                 id: i,
                 x: Math.random() * 100,
-                y: -15 - Math.random() * 10,
+                y: -10 - Math.random() * 20,
                 color: COLORS[Math.floor(Math.random() * COLORS.length)],
-                delay: Math.random() * 2.5,
-                size: 6 + Math.random() * 8,
+                delay: Math.random() * 3,
+                size: 5 + Math.random() * 7,
                 type: 'confetti',
                 rotation: Math.random() * 360,
             });
         }
 
-        // Sparkle particles
-        for (let i = 80; i < 110; i++) {
+        // Firework "Royal Bursts"
+        for (let i = 60; i < 75; i++) {
             result.push({
                 id: i,
-                x: 5 + Math.random() * 90,
-                y: 5 + Math.random() * 90,
+                x: 10 + Math.random() * 80,
+                y: 10 + Math.random() * 40,
                 color: COLORS[Math.floor(Math.random() * COLORS.length)],
-                delay: Math.random() * 4,
-                size: 3 + Math.random() * 6,
-                type: 'sparkle',
-                rotation: 0,
-            });
-        }
-
-        // Firework bursts
-        for (let i = 110; i < 125; i++) {
-            result.push({
-                id: i,
-                x: 15 + Math.random() * 70,
-                y: 15 + Math.random() * 50,
-                color: COLORS[Math.floor(Math.random() * COLORS.length)],
-                delay: Math.random() * 2,
-                size: 30 + Math.random() * 40,
+                delay: Math.random() * 2.5,
+                size: 40 + Math.random() * 60,
                 type: 'firework',
                 rotation: 0,
             });
@@ -79,8 +63,8 @@ export function WinCelebration({ onNewGame, time, moves, score }: WinCelebration
     }, []);
 
     useEffect(() => {
-        const modalTimer = setTimeout(() => setShowModal(true), 300);
-        const confettiTimer = setTimeout(() => setShowConfetti(false), 5000);
+        const modalTimer = setTimeout(() => setShowModal(true), 400);
+        const confettiTimer = setTimeout(() => setShowConfetti(false), 8000);
 
         return () => {
             clearTimeout(modalTimer);
@@ -94,139 +78,111 @@ export function WinCelebration({ onNewGame, time, moves, score }: WinCelebration
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const getRating = () => {
-        if (score >= 700 && time < 180) return { text: 'Legendary', color: 'text-[#ffd700]', subtext: 'Masterful play' };
-        if (score >= 500 && time < 300) return { text: 'Excellent', color: 'text-[#d4a533]', subtext: 'Impressive victory' };
-        if (score >= 300) return { text: 'Great', color: 'text-white', subtext: 'Well played' };
-        return { text: 'Victory', color: 'text-white/80', subtext: 'Game complete' };
+    const getBespokeRating = () => {
+        if (score >= 700 && time < 150) return { title: 'Grandmaster', subtitle: 'The Ultimate Achievement' };
+        if (score >= 500 && time < 240) return { title: 'Artisan', subtitle: 'Exceptional Technique' };
+        if (score >= 300) return { title: 'Adept', subtitle: 'A Refined Performance' };
+        return { title: 'Victor', subtitle: 'The Table is Cleared' };
     };
 
-    const rating = getRating();
+    const rating = getBespokeRating();
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
-            {/* Backdrop */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden">
+            {/* Imperial Backdrop */}
             <div
-                className={`absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-500 ${showModal ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute inset-0 bg-black/85 backdrop-blur-xl transition-opacity duration-700 ${showModal ? 'opacity-100' : 'opacity-0'}`}
             />
 
-            {/* Particles */}
+            {/* Celebration Particles */}
             {showConfetti && (
-                <>
-                    {particles.filter(p => p.type === 'confetti').map((p) => (
+                <div className="absolute inset-0 pointer-events-none">
+                    {particles.map((p) => (
                         <div
                             key={p.id}
-                            className="confetti-particle absolute pointer-events-none"
+                            className={`${p.type === 'confetti' ? 'confetti-particle' : 'firework-burst'} absolute`}
                             style={{
                                 left: `${p.x}%`,
                                 top: `${p.y}%`,
                                 width: p.size,
-                                height: p.size * 0.5,
-                                backgroundColor: p.color,
-                                borderRadius: '1px',
+                                height: p.type === 'confetti' ? p.size * 0.4 : p.size,
+                                backgroundColor: p.type === 'confetti' ? p.color : 'transparent',
+                                border: p.type === 'firework' ? `1.5px solid ${p.color}` : 'none',
                                 animationDelay: `${p.delay}s`,
                                 transform: `rotate(${p.rotation}deg)`,
+                                opacity: 0.8,
                             }}
                         />
                     ))}
-
-                    {particles.filter(p => p.type === 'sparkle').map((p) => (
-                        <div
-                            key={p.id}
-                            className="sparkle absolute pointer-events-none"
-                            style={{
-                                left: `${p.x}%`,
-                                top: `${p.y}%`,
-                                width: p.size,
-                                height: p.size,
-                                backgroundColor: p.color,
-                                borderRadius: '50%',
-                                animationDelay: `${p.delay}s`,
-                                boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
-                            }}
-                        />
-                    ))}
-
-                    {particles.filter(p => p.type === 'firework').map((p) => (
-                        <div
-                            key={p.id}
-                            className="firework-burst absolute pointer-events-none rounded-full"
-                            style={{
-                                left: `${p.x}%`,
-                                top: `${p.y}%`,
-                                width: p.size,
-                                height: p.size,
-                                border: `2px solid ${p.color}`,
-                                animationDelay: `${p.delay}s`,
-                                marginLeft: -p.size / 2,
-                                marginTop: -p.size / 2,
-                            }}
-                        />
-                    ))}
-                </>
+                </div>
             )}
 
-            {/* Victory Modal */}
+            {/* Imperial Victory Plinth */}
             <div
                 className={`
-                    relative z-10 w-full max-w-sm mx-4
-                    bg-gradient-to-b from-[#18181f] via-[#12121a] to-[#0a0a0f]
-                    border border-[#d4a533]/30 rounded-2xl
-                    shadow-2xl shadow-[#d4a533]/20
-                    transform transition-all duration-500 ease-out
-                    ${showModal ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-8'}
+                    relative z-10 w-full max-w-sm mx-6
+                    glass rounded-[32px] p-8 sm:p-10
+                    shadow-[0_40px_100px_rgba(0,0,0,0.8)]
+                    transform transition-all duration-700 var(--ease-imperial)
+                    ${showModal ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-12'}
                 `}
             >
-                {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#d4a533]/20 via-[#ffd700]/10 to-[#d4a533]/20 rounded-2xl blur-xl opacity-50" />
+                {/* Silver Border Frame */}
+                <div className="absolute inset-2 border border-white/5 rounded-[26px] pointer-events-none" />
 
-                <div className="relative p-6 sm:p-8">
-                    {/* Trophy/Crown Icon - SVG, not emoji */}
-                    <div className="flex justify-center mb-5">
-                        <div className="relative">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#d4a533] via-[#ffd700] to-[#b8860b] flex items-center justify-center shadow-xl shadow-[#d4a533]/30">
-                                {/* Crown SVG Icon */}
-                                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
-                                </svg>
-                            </div>
-                            <div className="absolute inset-0 rounded-full bg-[#ffd700]/30 animate-ping" style={{ animationDuration: '2s' }} />
+                <div className="flex flex-col items-center">
+                    {/* Emblems of Victory */}
+                    <div className="relative mb-8 group">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#d4a533] via-[#ffd700] to-[#b8860b] flex items-center justify-center shadow-[0_15px_35px_rgba(212,165,51,0.4)] animate-float-subtle relative overflow-hidden">
+                            {/* Persistent Gold Shimmer */}
+                            <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                            <svg className="w-12 h-12 text-black relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+                            </svg>
+                        </div>
+                        <div className="absolute -inset-4 border border-[#d4a533]/20 rounded-full animate-pulse" />
+                    </div>
+
+                    {/* Bespoke Rating Display */}
+                    <div className="text-center mb-10">
+                        <div className="text-[10px] uppercase tracking-[0.3em] text-[#d4a533] font-bold mb-3 opacity-60">Attained Rank</div>
+                        <h2 className="text-4xl sm:text-5xl font-serif font-bold text-imperial-gold mb-2 drop-shadow-sm select-none animate-shimmer" style={{ backgroundClip: 'text' }}>
+                            {rating.title}
+                        </h2>
+                        <p className="text-white/40 text-sm italic font-serif opacity-80">{rating.subtitle}</p>
+                    </div>
+
+                    {/* Imperial Metrics Grid */}
+                    <div className="w-full grid grid-cols-2 gap-4 mb-10">
+                        <div className="flex flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/5">
+                            <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold mb-2">Duration</span>
+                            <span className="text-xl font-mono text-white/90">{formatTime(time)}</span>
+                        </div>
+                        <div className="flex flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/5">
+                            <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold mb-2">Strategy</span>
+                            <span className="text-xl font-mono text-white/90">{moves} moves</span>
                         </div>
                     </div>
 
-                    {/* Rating */}
-                    <h2 className="text-3xl sm:text-4xl font-bold text-center mb-1" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                        <span className={rating.color}>{rating.text}</span>
-                    </h2>
-                    <p className="text-white/40 text-center text-sm mb-6">{rating.subtext}</p>
-
-                    {/* Score highlight */}
-                    <div className="bg-gradient-to-r from-[#d4a533]/15 via-[#ffd700]/20 to-[#d4a533]/15 rounded-xl p-4 mb-4 border border-[#d4a533]/25">
-                        <div className="text-center">
-                            <div className="text-[#d4a533]/60 text-xs uppercase tracking-widest mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>Final Score</div>
-                            <div className="text-4xl font-bold text-[#ffd700]" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{score}</div>
-                        </div>
+                    <div className="flex flex-col items-center mb-10">
+                        <span className="text-[10px] uppercase tracking-widest text-[#d4a533]/60 font-bold mb-1">Final Standing</span>
+                        <span className="text-5xl font-serif font-bold text-imperial-gold tabular-nums">{score}</span>
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                            <div className="text-white/40 text-xs uppercase tracking-wider mb-1">Time</div>
-                            <div className="text-xl font-mono font-semibold text-white">{formatTime(time)}</div>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                            <div className="text-white/40 text-xs uppercase tracking-wider mb-1">Moves</div>
-                            <div className="text-xl font-mono font-semibold text-white">{moves}</div>
-                        </div>
-                    </div>
-
-                    {/* Play Again Button */}
+                    {/* Affirmation Command */}
                     <button
                         onClick={onNewGame}
-                        className="w-full py-4 bg-gradient-to-r from-[#8b6914] via-[#b8860b] to-[#8b6914] hover:from-[#b8860b] hover:via-[#d4a533] hover:to-[#b8860b] text-white font-semibold rounded-xl shadow-lg shadow-[#d4a533]/30 active:scale-[0.98] transition-all text-lg border border-[#d4a533]/50"
-                        style={{ fontFamily: "'Inter', sans-serif" }}
+                        className="btn-squish w-full py-5 bg-white text-black font-bold text-sm rounded-2xl shadow-xl hover:bg-[#f0f0f0] transition-all uppercase tracking-[0.2em] relative overflow-hidden group"
                     >
-                        Play Again
+                        <span className="relative z-10">Initiate New Round</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    </button>
+
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-6 text-[10px] uppercase tracking-widest text-white/30 hover:text-white/60 transition-colors font-bold"
+                    >
+                        Exit to Gallery
                     </button>
                 </div>
             </div>

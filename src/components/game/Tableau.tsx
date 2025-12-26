@@ -7,6 +7,7 @@ interface TableauProps {
     onCardDoubleClick?: (card: CardType, pileIndex: number, cardIndex: number) => void;
     validDropTargets?: number[];
     isHintCard?: (cardId: string) => boolean;
+    isDealing?: boolean;
 }
 
 export function Tableau({
@@ -15,6 +16,7 @@ export function Tableau({
     onCardDoubleClick,
     validDropTargets = [],
     isHintCard,
+    isDealing,
 }: TableauProps) {
     return (
         <div className="flex gap-1 sm:gap-2 lg:gap-3 justify-center w-full px-1">
@@ -42,10 +44,11 @@ export function Tableau({
                                 return (
                                     <div
                                         key={card.id}
-                                        className="relative"
+                                        className={`relative ${isDealing ? 'animate-fly-in' : ''}`}
                                         style={{
                                             marginTop: cardIndex === 0 ? 0 : `-${66 - offset}px`,
                                             zIndex: cardIndex,
+                                            animationDelay: isDealing ? `${(pileIndex * 0.1) + (cardIndex * 0.05)}s` : undefined,
                                         }}
                                     >
                                         <Card

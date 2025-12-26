@@ -33,6 +33,9 @@ export interface GameState {
     isComplete: boolean;
     canAutoComplete: boolean;
     isAutoCompleting: boolean; // True during auto-complete animation
+    isDealing: boolean; // True during the initial card layout animation
+    comboMultiplier: number; // Multiplier for rapid moves
+    lastMoveTime: number | null; // Timestamp of the last scoring move
 }
 
 // Move for undo/redo
@@ -48,6 +51,7 @@ export interface GameStats {
     gamesPlayed: number;
     gamesWon: number;
     bestTime: number; // in seconds, 0 means no best time yet
+    bestScore: number; // highest score achieved
     currentStreak: number;
     bestStreak: number;
     totalMoves: number;
@@ -60,6 +64,7 @@ export interface GameSettings {
     hapticEnabled: boolean;
     autoComplete: boolean;
     cardSize: 'normal' | 'large' | 'xlarge';
+    tableTheme: 'midnight' | 'emerald' | 'amethyst';
 }
 
 // Drag state

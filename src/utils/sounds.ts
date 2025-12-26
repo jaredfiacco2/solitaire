@@ -1,70 +1,100 @@
 // Card game sound effects using real audio files
 // Much better sound quality than Web Audio API synthesis
 
-// Audio element cache for reuse
-const audioCache: Map<string, HTMLAudioElement> = new Map();
+// Organic Audio Engine - Web Audio API with Pitch/Volume Jitter
+let audioCtx: AudioContext | null = null;
+const bufferCache: Map<string, AudioBuffer> = new Map();
 
-// Preload and cache an audio file
-function loadAudio(src: string): HTMLAudioElement {
-    const cached = audioCache.get(src);
-    if (cached) return cached;
-
-    const audio = new Audio(src);
-    audio.preload = 'auto';
-    audioCache.set(src, audio);
-    return audio;
+// Initialize or resume the AudioContext
+async function getAudioCtx(): Promise<AudioContext> {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+    }
+    return audioCtx;
 }
 
-// Play audio with optional volume
-function playAudio(src: string, volume = 0.5): void {
+// Load and decode an audio file into a buffer
+async function loadToBuffer(src: string): Promise<AudioBuffer> {
+    const cached = bufferCache.get(src);
+    if (cached) return cached;
+
+    const response = await fetch(src);
+    const arrayBuffer = await response.arrayBuffer();
+    const ctx = await getAudioCtx();
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+    bufferCache.set(src, audioBuffer);
+    return audioBuffer;
+}
+
+// Play a buffer with organic variation (pitch and volume jitter)
+async function playOrganic(src: string, baseVolume = 0.5): Promise<void> {
     try {
-        const audio = loadAudio(src);
-        audio.currentTime = 0;
-        audio.volume = volume;
-        audio.play().catch(() => {
-            // Auto-play blocked, ignore
-        });
-    } catch {
-        // Audio not available
+        const ctx = await getAudioCtx();
+        const buffer = await loadToBuffer(src);
+
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+
+        // Organic Pitch Shift (Variation in physical impact)
+        // A 0.95 to 1.05 range provides a subtle, realistic variety
+        const pitchVariation = 0.96 + Math.random() * 0.08;
+        source.playbackRate.setValueAtTime(pitchVariation, ctx.currentTime);
+
+        const gainNode = ctx.createGain();
+        // Organic Volume Jitter
+        const volumeVariation = baseVolume * (0.9 + Math.random() * 0.2);
+        gainNode.gain.setValueAtTime(volumeVariation, ctx.currentTime);
+
+        source.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        source.start(0);
+    } catch (error) {
+        console.warn('Audio playback failed:', error);
     }
 }
 
-// Resume audio context on user interaction (for Safari/mobile)
+// Tactile Feedback - Physical vibration for mobile
+export function triggerHaptic(type: 'light' | 'medium' | 'success' = 'light'): void {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        switch (type) {
+            case 'light': navigator.vibrate(10); break;
+            case 'medium': navigator.vibrate(20); break;
+            case 'success': navigator.vibrate([15, 30, 15]); break;
+        }
+    }
+}
+
 export function initAudio(): void {
-    // Pre-load all sound files
-    loadAudio('/sounds/card-shuffle.mp3');
-    loadAudio('/sounds/card-place.mp3');
-    loadAudio('/sounds/success.mp3');
+    // Pre-seed the buffers for zero-latency first play
+    ['/sounds/card-place.mp3', '/sounds/card-shuffle.mp3', '/sounds/success.mp3'].forEach(loadToBuffer);
 }
 
-// Card flip sound - use place sound at lower volume
 export function playCardFlip(): void {
-    playAudio('/sounds/card-place.mp3', 0.3);
+    playOrganic('/sounds/card-place.mp3', 0.25);
 }
 
-// Card place/drop sound
 export function playCardPlace(): void {
-    playAudio('/sounds/card-place.mp3', 0.5);
+    playOrganic('/sounds/card-place.mp3', 0.45);
 }
 
-// Draw card from deck - quick snap
 export function playCardDraw(): void {
-    playAudio('/sounds/card-place.mp3', 0.4);
+    playOrganic('/sounds/card-place.mp3', 0.35);
 }
 
-// Shuffle sound - realistic card shuffle
 export function playCardShuffle(): void {
-    playAudio('/sounds/card-shuffle.mp3', 0.6);
+    playOrganic('/sounds/card-shuffle.mp3', 0.55);
 }
 
-// Success sound - pleasant chime for foundation placement
 export function playSuccess(): void {
-    playAudio('/sounds/success.mp3', 0.4);
+    playOrganic('/sounds/success.mp3', 0.35);
 }
 
-// Win fanfare - use success sound louder
 export function playWinFanfare(): void {
-    playAudio('/sounds/success.mp3', 0.7);
+    playOrganic('/sounds/success.mp3', 0.65);
 }
 
 // Error/invalid move sound - keeping Web Audio for this simple one
@@ -114,5 +144,63 @@ export function playUndo(): void {
         osc.stop(ctx.currentTime + 0.1);
     } catch {
         // Audio not available
+    }
+}
+// Ambient Room Tone - Persistent low-frequency atmosphere
+let ambientContext: AudioContext | null = null;
+let ambientSource: AudioBufferSourceNode | null = null;
+let ambientGain: GainNode | null = null;
+
+export function startAmbient(): void {
+    if (ambientContext || ambientSource) return;
+
+    try {
+        ambientContext = new AudioContext();
+
+        // Create brown noise for "felt" texture
+        const bufferSize = ambientContext.sampleRate * 2;
+        const buffer = ambientContext.createBuffer(1, bufferSize, ambientContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        let lastOut = 0;
+
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            lastOut = (lastOut + (0.02 * white)) / 1.02;
+            data[i] = lastOut * 3.5; // Brown noise approximation
+        }
+
+        ambientSource = ambientContext.createBufferSource();
+        ambientSource.buffer = buffer;
+        ambientSource.loop = true;
+
+        const filter = ambientContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(400, ambientContext.currentTime);
+        filter.Q.setValueAtTime(1, ambientContext.currentTime);
+
+        ambientGain = ambientContext.createGain();
+        ambientGain.gain.setValueAtTime(0, ambientContext.currentTime);
+        // Fade in gracefully
+        ambientGain.gain.linearRampToValueAtTime(0.04, ambientContext.currentTime + 1.5);
+
+        ambientSource.connect(filter);
+        filter.connect(ambientGain);
+        ambientGain.connect(ambientContext.destination);
+
+        ambientSource.start();
+    } catch {
+        // Audio not available
+    }
+}
+
+export function stopAmbient(): void {
+    if (ambientGain && ambientContext) {
+        ambientGain.gain.linearRampToValueAtTime(0, ambientContext.currentTime + 0.5);
+        setTimeout(() => {
+            ambientSource?.stop();
+            ambientSource = null;
+            ambientContext?.close();
+            ambientContext = null;
+        }, 600);
     }
 }

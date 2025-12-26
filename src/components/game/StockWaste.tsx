@@ -10,6 +10,7 @@ interface StockWasteProps {
     onWasteCardDoubleClick?: (card: CardType) => void;
     isHintCard?: (cardId: string) => boolean;
     isStockHint?: boolean;
+    isDealing?: boolean;
 }
 
 export function StockWaste({
@@ -21,61 +22,67 @@ export function StockWaste({
     onWasteCardDoubleClick,
     isHintCard,
     isStockHint = false,
+    isDealing = false,
 }: StockWasteProps) {
     const visibleWaste = drawMode === 3 ? waste.slice(-3) : waste.slice(-1);
 
     return (
-        <div className="flex gap-2 sm:gap-3">
-            {/* Stock pile */}
-            <div className="relative">
+        <div className="flex gap-4 sm:gap-8">
+            {/* Imperial Stock Pillar */}
+            <div className="relative group">
                 {stock.length === 0 ? (
                     <EmptyPile type="stock" onClick={onStockClick} isHint={isStockHint} />
                 ) : (
                     <div
                         onClick={onStockClick}
-                        className={`cursor-pointer relative ${isStockHint ? 'animate-pulse' : ''}`}
+                        className={`cursor-pointer relative transition-transform duration-300 hover:translate-y-[-2px] active:translate-y-[1px] ${isStockHint ? 'animate-pulse' : ''} ${isDealing ? 'animate-fly-in' : ''}`}
+                        style={{ animationDelay: isDealing ? '0s' : undefined }}
                     >
+                        {/* Stack Materiality */}
                         {stock.length > 2 && (
-                            <div className="absolute left-[2px] top-[2px] card-base bg-blue-800 border border-blue-600/30 opacity-60" />
+                            <div className="absolute left-[3px] top-[3px] w-full h-full rounded-[8px] bg-[#121218] border border-white/5 opacity-40 shadow-sm" />
                         )}
                         {stock.length > 1 && (
-                            <div className="absolute left-[1px] top-[1px] card-base bg-blue-700 border border-blue-500/30 opacity-80" />
+                            <div className="absolute left-[1.5px] top-[1.5px] w-full h-full rounded-[8px] bg-[#1a1a24] border border-white/5 opacity-60 shadow-sm" />
                         )}
                         <Card card={stock[stock.length - 1]} isTopCard isHint={isStockHint} />
 
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 text-white text-[10px] sm:text-xs font-bold rounded-full flex items-center justify-center shadow-lg border border-blue-400/50">
+                        {/* Imperial Count Badge */}
+                        <div className="absolute -bottom-2 -right-2 min-w-[24px] h-6 px-1.5 bg-gradient-to-br from-[#d4a533] via-[#ffd700] to-[#b8860b] text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(212,165,51,0.3)] border border-white/20 select-none">
                             {stock.length}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Waste pile */}
+            {/* Imperial Waste Trail */}
             <div className="relative" style={{ minWidth: 'var(--card-width-mobile)' }}>
                 {visibleWaste.length === 0 ? (
-                    <div className="card-base" />
+                    <div className="w-[var(--card-width-mobile)] h-[calc(var(--card-width-mobile)*1.4)] rounded-[8px] border border-white/5 bg-white/2 opacity-20" />
                 ) : (
                     <div className="relative">
                         {visibleWaste.map((card, idx) => {
                             const isLast = idx === visibleWaste.length - 1;
-                            const offset = drawMode === 3 ? idx * 14 : 0;
+                            const offset = drawMode === 3 ? idx * 22 : 0;
 
                             return (
                                 <div
                                     key={card.id}
-                                    className="absolute top-0"
+                                    className="absolute top-0 transition-all duration-300"
                                     style={{
                                         left: offset,
                                         zIndex: idx,
                                     }}
                                 >
-                                    <Card
-                                        card={card}
-                                        isTopCard={isLast}
-                                        isHint={isLast && isHintCard?.(card.id)}
-                                        onClick={isLast ? () => onWasteCardClick?.(card) : undefined}
-                                        onDoubleClick={isLast ? () => onWasteCardDoubleClick?.(card) : undefined}
-                                    />
+                                    <div className={isLast ? 'relative' : 'opacity-80 scale-95 origin-left'}>
+                                        <Card
+                                            card={card}
+                                            isTopCard={isLast}
+                                            isHint={isLast && isHintCard?.(card.id)}
+                                            onClick={isLast ? () => onWasteCardClick?.(card) : undefined}
+                                            onDoubleClick={isLast ? () => onWasteCardDoubleClick?.(card) : undefined}
+                                        />
+                                    </div>
                                 </div>
                             );
                         })}

@@ -15,9 +15,9 @@ export function Foundation({
     validDropTargets = [],
 }: FoundationProps) {
     return (
-        <div className="flex gap-1 sm:gap-2">
+        <div className="flex gap-2 sm:gap-3">
             {piles.map((pile, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative group">
                     {pile.length === 0 ? (
                         <EmptyPile
                             type="foundation"
@@ -25,18 +25,16 @@ export function Foundation({
                             suitHint={SUIT_HINTS[index]}
                         />
                     ) : (
-                        <div className="relative">
+                        <div className="relative transition-transform duration-300 hover:translate-y-[-2px] active:translate-y-[1px]">
                             <Card
                                 card={pile[pile.length - 1]}
                                 onClick={() => onCardClick?.(pile[pile.length - 1], index)}
                                 isTopCard
                             />
-                            {/* Card count badge - Premium gold style */}
-                            {pile.length > 1 && (
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#d4a533] text-black text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border border-white/20">
-                                    {pile.length}
-                                </div>
-                            )}
+                            {/* Imperial Progression Badge */}
+                            <div className="absolute -bottom-2 -right-2 min-w-[20px] h-5 px-1 bg-gradient-to-br from-[#d4a533] to-[#b8860b] text-black text-[9px] font-bold rounded-full flex items-center justify-center shadow-[0_4px_8px_rgba(212,165,51,0.3)] border border-white/20 select-none">
+                                {pile.length}
+                            </div>
                         </div>
                     )}
                 </div>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Card as CardType, Suit } from '../../types/game';
 import { getRankDisplay, getCardColor } from '../../utils/deck';
 
@@ -53,98 +54,126 @@ export function Card({
     const rank = getRankDisplay(card.rank);
     const isRed = color === 'red';
 
+    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isTopCard) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const xRotation = ((y - rect.height / 2) / rect.height) * 12;
+        const yRotation = ((x - rect.width / 2) / rect.width) * -12;
+        setTilt({ x: xRotation, y: yRotation });
+    };
+
+    const handleMouseLeave = () => {
+        setTilt({ x: 0, y: 0 });
+    };
+
     if (!card.faceUp) {
         return (
-            <div
-                className={`
-                    card-base card-transition relative cursor-pointer select-none no-select
-                    bg-gradient-to-br from-[#1a237e] via-[#0d1442] to-[#1a237e]
-                    border border-[#3949ab]/40
-                    overflow-hidden
-                    ${isTopCard ? 'card-hoverable' : ''}
-                    ${className}
-                `}
-                onClick={onClick}
-            >
-                {/* Outer border - elegant double line effect */}
-                <div className="absolute inset-[2px] rounded-[6px] border border-[#3949ab]/30" />
+            <div className="perspective-1000">
+                <div
+                    className={`
+                        card-base card-transition card-container relative cursor-pointer overflow-hidden
+                        bg-gradient-to-br from-[#0c1231] via-[#05081a] to-[#0c1231]
+                        ${isTopCard ? 'card-hoverable' : ''}
+                        ${className}
+                    `}
+                    onClick={onClick}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                    style={{
+                        transform: isTopCard ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined
+                    }}
+                >
+                    {/* Silver Precision Border */}
+                    <div className="absolute inset-0 border border-white/10 rounded-[var(--card-radius)] pointer-events-none" />
 
-                {/* Inner decorative frame */}
-                <div className="absolute inset-[5px] rounded-[4px] border border-[#3949ab]/20" />
+                    {/* Inner Decorative Silk Frame */}
+                    <div className="absolute inset-[4px] rounded-[6px] border border-[#d4a533]/20 pointer-events-none" />
+                    <div className="absolute inset-[5px] rounded-[5px] border border-[#d4a533]/10 pointer-events-none" />
 
-                {/* Premium geometric center pattern */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative w-8 h-8 sm:w-10 sm:h-10">
-                        {/* Diamond shape */}
-                        <div className="absolute inset-0 rotate-45 border-2 border-[#d4a533]/40 rounded-sm" />
-                        {/* Inner diamond */}
-                        <div className="absolute inset-2 rotate-45 border border-[#d4a533]/25 rounded-sm" />
-                        {/* Center dot */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-[#d4a533]/30" />
+                    {/* Premium Geometric Center Emblem */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                            {/* Outer Diamond */}
+                            <div className="absolute inset-0 rotate-45 border border-[#d4a533]/40 rounded-sm" />
+                            {/* Inner Diamond */}
+                            <div className="absolute inset-2 rotate-45 bg-[#d4a533]/10 border border-[#d4a533]/20" />
+                            {/* Center Star/Dot */}
+                            <div className="w-2.5 h-2.5 bg-[#d4a533]/60 rounded-full shadow-[0_0_8px_rgba(212,165,51,0.4)]" />
                         </div>
                     </div>
+
+                    {/* Corner Guilloché Accents */}
+                    <div className="absolute top-2 left-2 w-1.5 h-1.5 border-t border-l border-[#d4a533]/40" />
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 border-t border-r border-[#d4a533]/40" />
+                    <div className="absolute bottom-2 left-2 w-1.5 h-1.5 border-b border-l border-[#d4a533]/40" />
+                    <div className="absolute bottom-2 right-2 w-1.5 h-1.5 border-b border-r border-[#d4a533]/40" />
+
+                    {/* Silk Shimmer Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none opacity-40 mix-blend-overlay" />
                 </div>
-
-                {/* Corner accents - small gold dots */}
-                <div className="absolute top-2 left-2 w-1 h-1 rounded-full bg-[#d4a533]/40" />
-                <div className="absolute top-2 right-2 w-1 h-1 rounded-full bg-[#d4a533]/40" />
-                <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full bg-[#d4a533]/40" />
-                <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full bg-[#d4a533]/40" />
-
-                {/* Subtle shimmer overlay */}
-                <div className="absolute inset-0 opacity-5 shimmer" />
             </div>
         );
     }
 
     return (
-        <div
-            className={`
-                card-base card-transition relative cursor-pointer select-none
-                bg-gradient-to-br from-[#faf8f5] via-[#fffefa] to-[#f5f0e8]
-                border border-[#e8e0d0]
-                overflow-hidden touch-manipulation
-                ${isTopCard ? 'card-hoverable' : ''}
-                ${isHint ? 'ring-2 ring-[#d4a533] ring-offset-2 ring-offset-transparent animate-pulse shadow-lg shadow-[#d4a533]/30' : ''}
-                ${className}
-            `}
-            onClick={onClick}
-            onDoubleClick={onDoubleClick}
-            style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' } as React.CSSProperties}
-        >
-            {/* Invisible click layer to prevent text selection */}
-            <div className="absolute inset-0 z-10" />
+        <div className="perspective-1000">
+            <div
+                className={`
+                    card-base card-transition card-face-material card-container relative cursor-pointer
+                    bg-gradient-to-br from-[#ffffff] via-[#fdfcf9] to-[#f5f2e8]
+                    overflow-hidden touch-manipulation
+                    ${isTopCard ? 'card-hoverable' : ''}
+                    ${isHint ? 'ring-[2.5px] ring-[#d4a533] ring-offset-2 ring-offset-transparent animate-pulse shadow-[0_0_25px_rgba(212,165,51,0.5)]' : ''}
+                    ${className}
+                `}
+                onClick={onClick}
+                onDoubleClick={onDoubleClick}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                style={{
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    transform: isTopCard ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined
+                } as React.CSSProperties}
+            >
+                {/* Invisible interaction layer */}
+                <div className="absolute inset-0 z-10" />
 
-            {/* Subtle inner shadow for depth */}
-            <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] pointer-events-none" />
+                {/* Inner Beveled Highlight (Structural depth) */}
+                <div className="absolute inset-0 border-[0.5px] border-black/5 rounded-[var(--card-radius)] pointer-events-none" />
+                <div className="absolute inset-[0.5px] border-[0.5px] border-white/60 rounded-[var(--card-radius)] pointer-events-none" />
 
-            <div className="absolute inset-0 p-0.5 sm:p-1 pointer-events-none">
-                {/* Top left corner */}
-                <div className={`absolute top-0.5 left-1 sm:top-1 sm:left-1.5 leading-none ${isRed ? 'text-[#c41e3a]' : 'text-[#1a1a1a]'}`}>
-                    <div className="text-xs sm:text-sm lg:text-base font-semibold" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{rank}</div>
-                    <SuitIcon suit={card.suit} className="w-2.5 h-2.5 sm:w-4 sm:h-4 mt-0.5 opacity-90" />
+                <div className="absolute inset-0 p-1 sm:p-1.5 pointer-events-none select-none">
+                    {/* Top left metadata */}
+                    <div className={`absolute top-1 left-1.5 sm:top-1.5 sm:left-2 leading-none ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
+                        <div className="text-xs sm:text-sm lg:text-[1.1rem] font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>{rank}</div>
+                        <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4.5 sm:h-4.5 mt-0.5" />
+                    </div>
+
+                    {/* Center focus suit - physical etching style */}
+                    <div className={`absolute inset-0 flex items-center justify-center ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
+                        <SuitIcon suit={card.suit} className="w-7 h-7 sm:w-11 sm:h-11 lg:w-14 lg:h-14 opacity-[0.88] drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]" />
+                    </div>
+
+                    {/* Bottom right metadata */}
+                    <div className={`absolute bottom-1 right-1.5 sm:bottom-1.5 sm:right-2 leading-none rotate-180 ${isRed ? 'text-[#c4151c]' : 'text-[#111111]'}`}>
+                        <div className="text-xs sm:text-sm lg:text-[1.1rem] font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>{rank}</div>
+                        <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4.5 sm:h-4.5 mt-0.5" />
+                    </div>
                 </div>
 
-                {/* Center suit - premium styling */}
-                <div className={`absolute inset-0 flex items-center justify-center ${isRed ? 'text-[#c41e3a]' : 'text-[#1a1a1a]'}`}>
-                    <SuitIcon suit={card.suit} className="w-6 h-6 sm:w-10 sm:h-10 lg:w-12 lg:h-12 opacity-80" />
-                </div>
+                {/* Premium Gold/Silver inner frame (Very subtle) */}
+                <div className="absolute inset-[3px] rounded-[7px] border border-black/5 pointer-events-none opacity-40" />
 
-                {/* Bottom right corner */}
-                <div className={`absolute bottom-0.5 right-1 sm:bottom-1 sm:right-1.5 leading-none rotate-180 ${isRed ? 'text-[#c41e3a]' : 'text-[#1a1a1a]'}`}>
-                    <div className="text-xs sm:text-sm lg:text-base font-semibold" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{rank}</div>
-                    <SuitIcon suit={card.suit} className="w-2.5 h-2.5 sm:w-4 sm:h-4 mt-0.5 opacity-90" />
-                </div>
+                {/* Hint aura */}
+                {isHint && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#d4a533]/5 to-transparent pointer-events-none" />
+                )}
             </div>
-
-            {/* Premium inner border */}
-            <div className="absolute inset-[2px] rounded-[6px] border border-[#d4c4a8]/40 pointer-events-none" />
-
-            {/* Hint glow overlay */}
-            {isHint && (
-                <div className="absolute inset-0 bg-[#d4a533]/10 pointer-events-none" />
-            )}
         </div>
     );
 }
