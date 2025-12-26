@@ -1,0 +1,73 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'CDK action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - diff
+          - destroy
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  cdk:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CDK dependencies
+        working-directory: infra
+        run: npm install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Bootstrap (if needed)
+        working-directory: infra
+        run: npx cdk bootstrap --require-approval never
+        if: ${{ github.event.inputs.action == 'deploy' }}
+        continue-on-error: true
+
+      - name: CDK Diff
+        working-directory: infra
+        run: npx cdk diff
+        if: ${{ github.event.inputs.action == 'diff' }}
+
+      - name: CDK Deploy
+        working-directory: infra
+        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+        if: ${{ github.event.inputs.action == 'deploy' }}
+
+      - name: Show outputs
+        working-directory: infra
+        run: |
+          echo "=== CDK Outputs ==="
+          cat cdk-outputs.json
+          echo ""
+          echo "=== Set these as GitHub repository variables ==="
+          echo "S3_BUCKET: $(jq -r '.SolitaireStack.S3BucketName // empty' cdk-outputs.json)"
+          echo "CLOUDFRONT_ID: $(jq -r '.SolitaireStack.CloudFrontDistributionId // empty' cdk-outputs.json)"
+        if: ${{ github.event.inputs.action == 'deploy' }}
+
+      - name: CDK Destroy
+        working-directory: infra
+        run: npx cdk destroy --force
+        if: ${{ github.event.inputs.action == 'destroy' }}
