@@ -15,28 +15,26 @@ const SuitIcon = ({ suit, className = "" }: { suit: Suit, className?: string }) 
     switch (suit) {
         case 'hearts':
             return (
-                <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                <svg viewBox="0 0 16 16" className={className} fill="currentColor">
+                    <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
                 </svg>
             );
         case 'diamonds':
             return (
-                <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 2L4.5 12 12 22l7.5-10L12 2z" />
+                <svg viewBox="0 0 16 16" className={className} fill="currentColor">
+                    <path d="M8 0L2 8l6 8 6-8-6-8z" />
                 </svg>
             );
         case 'clubs':
             return (
-                <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-3.5 11c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-2.5-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                    <path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm4.5 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-9 0c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
+                <svg viewBox="0 0 16 16" className={className} fill="currentColor">
+                    <path d="M11.5 12.5a3.5 3.5 0 1 1-2.658-3.393c.27-.11.597-.19.894-.325a3.5 3.5 0 1 0-4.472 0c.297.135.624.215.894.325A3.5 3.5 0 1 1 4.5 12.5H6.1l-1.6 2.5h7l-1.6-2.5h1.6zM8 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" />
                 </svg>
             );
         case 'spades':
             return (
-                <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-                    <path d="M12 2C9 2 4 9 4 12c0 3 2 5 5 5 2 0 3-1 3-1s1 1 3 1c3 0 5-2 5-5 0-3-5-10-8-10z" />
-                    <path d="M12 16v5h-2v-5h2z" />
+                <svg viewBox="0 0 16 16" className={className} fill="currentColor">
+                    <path d="M11 5a3 3 0 1 1-6 0c0-1.875 1.5-3.125 3-3.125s3 1.25 3 3.125c0 .807-.302 1.648-.841 2.43.537.782 1.184 1.489 1.83 2.116.653.637 1.285 1.114 1.708 1.42.051.037.091.066.121.088zm-3 10c.03-.022.07-.051.121-.088.423-.306 1.055-.783 1.708-1.42.646-.627 1.293-1.334 1.83-2.115.539-.783.841-1.624.841-2.431 0-1.875-1.562-3.125-3-3.125s-3 1.25-3 3.125c0 .807.302 1.648.841 2.43.537.782 1.184 1.489 1.83 2.116.653.637 1.285 1.114 1.708 1.42.051.037.091.066.121.088A.153.153 0 0 1 8 15zm0-15s3.5 4 3.5 7h-7c0-3 3.5-7 3.5-7z" />
                 </svg>
             );
         default:
