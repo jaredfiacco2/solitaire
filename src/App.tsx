@@ -164,6 +164,7 @@ function App() {
           <StockWaste
             stock={state.stock}
             waste={state.waste}
+            drawMode={settings.drawMode}
             onStockClick={drawFromStock}
             onWasteCardClick={(card) => handleCardTap(card, 'waste', 0)}
             isStockHint={hintCard?.cardId === 'stock'}
