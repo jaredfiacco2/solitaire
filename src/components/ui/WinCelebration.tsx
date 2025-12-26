@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 
 interface WinCelebrationProps {
     onNewGame: () => void;
@@ -28,7 +28,7 @@ export function WinCelebration({ onNewGame, time, moves, score }: WinCelebration
     const [showModal, setShowModal] = useState(false);
     const [showConfetti, setShowConfetti] = useState(true);
 
-    const particles = useMemo(() => {
+    const [particles] = useState<Particle[]>(() => {
         const result: Particle[] = [];
 
         // Luxury Confetti
@@ -60,7 +60,7 @@ export function WinCelebration({ onNewGame, time, moves, score }: WinCelebration
         }
 
         return result;
-    }, []);
+    });
 
     useEffect(() => {
         const modalTimer = setTimeout(() => setShowModal(true), 400);

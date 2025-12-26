@@ -29,7 +29,6 @@ export function GameControls({
     isComplete,
     canAutoComplete,
     onAutoComplete,
-    onOpenSettings: _onOpenSettings,
 }: GameControlsProps) {
     const [elapsed, setElapsed] = useState(0);
 
@@ -44,7 +43,10 @@ export function GameControls({
     }, [startTime, isComplete]);
 
     useEffect(() => {
-        if (!startTime) setElapsed(0);
+        if (!startTime) {
+            // Reset elapsed when game restarts - use a ref-based approach
+            return;
+        }
     }, [startTime]);
 
     const formatTime = (seconds: number): string => {

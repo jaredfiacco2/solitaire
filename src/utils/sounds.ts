@@ -8,7 +8,7 @@ const bufferCache: Map<string, AudioBuffer> = new Map();
 // Initialize or resume the AudioContext
 async function getAudioCtx(): Promise<AudioContext> {
     if (!audioCtx) {
-        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
     if (audioCtx.state === 'suspended') {
         await audioCtx.resume();

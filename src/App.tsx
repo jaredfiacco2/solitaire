@@ -32,6 +32,7 @@ function App() {
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [lastMoveSuccess, setLastMoveSuccess] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   // Handle card tap
   const handleCardTap = (card: CardType, fromType: 'waste' | 'tableau', fromIndex: number, cardsToMove?: CardType[]) => {
@@ -57,17 +58,26 @@ function App() {
       const time = Math.floor((Date.now() - state.startTime) / 1000);
       recordWin(time, state.moves, state.score);
     }
-  }, [state.isComplete, state.startTime, state.moves, recordWin]);
+  }, [state.isComplete, state.startTime, state.moves, state.score, recordWin]);
+
+  // Elapsed time timer
+  useEffect(() => {
+    if (!state.startTime || state.isComplete) return;
+
+    // Initial set happens in the interval immediately
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - state.startTime!) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [state.startTime, state.isComplete]);
+
 
   // Toggle draw mode
   const handleToggleDrawMode = () => {
     updateSettings({ drawMode: settings.drawMode === 1 ? 3 : 1 });
   };
 
-  // Calculate elapsed time
-  const elapsedTime = state.startTime
-    ? Math.floor((Date.now() - state.startTime) / 1000)
-    : 0;
+
 
   // Calculate card size class with mobile awareness
   const getCardSizeClass = () => {

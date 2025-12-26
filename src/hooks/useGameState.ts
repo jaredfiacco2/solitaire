@@ -150,7 +150,7 @@ export function useGameState() {
                 moves: prev.moves + 1,
             };
         });
-    }, [startTimer, saveToHistory]);
+    }, [startTimer, saveToHistory, settings.soundEnabled]);
 
     // Smart move with scoring
     const smartMove = useCallback((card: Card, fromType: PileType, fromIndex: number, cardsToMove?: Card[]) => {
@@ -250,7 +250,7 @@ export function useGameState() {
 
             return { ...prev, comboMultiplier: 1, lastMoveTime: now };
         });
-    }, [startTimer, settings]);
+    }, [startTimer, settings, saveToHistory]);
 
     // Find hint - suggests best move
     const findHint = useCallback(() => {
