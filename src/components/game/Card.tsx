@@ -127,7 +127,7 @@ export function Card({
                     bg-gradient-to-br from-[#ffffff] via-[#fdfcf9] to-[#f5f2e8]
                     overflow-hidden touch-manipulation
                     ${isTopCard ? 'card-hoverable' : ''}
-                    ${isHint ? 'ring-[2.5px] ring-[#d4a533] ring-offset-2 ring-offset-transparent animate-pulse shadow-[0_0_25px_rgba(212,165,51,0.5)]' : ''}
+                    ${isHint ? 'ring-4 ring-[#d4a533] ring-offset-4 ring-offset-transparent shadow-[0_0_40px_rgba(212,165,51,0.7)] scale-105 z-50' : ''}
                     ${className}
                 `}
                 onClick={onClick}
@@ -170,11 +170,12 @@ export function Card({
                 {/* Premium Gold/Silver inner frame (Very subtle) */}
                 <div className="absolute inset-[3px] rounded-[6px] border border-black/5 pointer-events-none opacity-40" />
 
-                {/* Enhanced Hint aura - Maximum visibility */}
+                {/* Enhanced Hint aura - MAXIMUM visibility */}
                 {isHint && (
                     <div className="absolute inset-0 z-20 pointer-events-none">
-                        <div className="absolute inset-0 bg-[#d4a533]/30 animate-pulse rounded-[var(--card-radius)]" />
-                        <div className="absolute inset-[-4px] border-2 border-[#d4a533] rounded-[12px] animate-bounce shadow-[0_0_15px_rgba(212,165,51,0.6)]" />
+                        <div className="absolute inset-0 bg-[#d4a533]/40 animate-pulse rounded-[var(--card-radius)]" />
+                        <div className="absolute inset-[-6px] border-4 border-[#d4a533] rounded-[14px] animate-pulse shadow-[0_0_30px_rgba(212,165,51,0.8),0_0_60px_rgba(212,165,51,0.4)]" />
+                        <div className="absolute inset-0 rounded-[var(--card-radius)] ring-4 ring-[#d4a533] ring-offset-4 ring-offset-transparent" />
                     </div>
                 )}
             </div>
@@ -205,12 +206,12 @@ export function EmptyPile({
                 flex items-center justify-center
                 transition-all duration-300
                 ${type === 'foundation'
-                    ? 'border-[#d4a533]/30 bg-[#d4a533]/5'
+                    ? 'border-[#d4a533]/40 bg-transparent'
                     : type === 'stock'
                         ? 'border-white/10 bg-transparent cursor-pointer hover:bg-white/5 active:scale-95'
-                        : 'border-white/10 bg-white/[0.02]'}
-                ${isValidTarget ? 'border-[#d4a533]/60 bg-[#d4a533]/10 shadow-lg shadow-[#d4a533]/20' : ''}
-                ${isHint ? 'ring-2 ring-[#d4a533] animate-pulse' : ''}
+                        : 'border-white/10 bg-transparent'}
+                ${isValidTarget ? 'border-[#d4a533]/80 bg-[#d4a533]/10 shadow-lg shadow-[#d4a533]/30 scale-105' : ''}
+                ${isHint ? 'ring-4 ring-[#d4a533] ring-offset-2 ring-offset-black animate-pulse shadow-[0_0_30px_rgba(212,165,51,0.6)]' : ''}
                 ${className}
             `}
             onClick={onClick}
