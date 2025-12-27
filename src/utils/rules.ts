@@ -144,6 +144,9 @@ export function hasAnyValidMove(state: GameState): boolean {
     // If stock has cards, player can always draw
     if (state.stock.length > 0) return true;
 
+    // If there are cards in the waste pile and stock is empty, player can recycle
+    if (state.waste.length > 0 && state.stock.length === 0) return true;
+
     // Check waste card
     if (state.waste.length > 0) {
         const wasteCard = state.waste[state.waste.length - 1];
@@ -169,6 +172,17 @@ export function hasAnyValidMove(state: GameState): boolean {
             const destIdx = findValidTableauDestination(card, state);
             if (destIdx !== -1 && destIdx !== pileIdx) {
                 // Valid move exists (even if it doesn't expose a new card)
+                return true;
+            }
+        }
+    }
+
+    // Check foundation cards - can any be moved to tableau?
+    for (let foundIdx = 0; foundIdx < 4; foundIdx++) {
+        const fPile = state.foundations[foundIdx];
+        if (fPile.length > 0) {
+            const topCard = fPile[fPile.length - 1];
+            if (findValidTableauDestination(topCard, state) !== -1) {
                 return true;
             }
         }

@@ -8,6 +8,7 @@ interface CardProps {
     onDoubleClick?: () => void;
     isTopCard?: boolean;
     isHint?: boolean;
+    isJustMoved?: boolean;
     className?: string;
 }
 
@@ -48,6 +49,7 @@ export function Card({
     onDoubleClick,
     isTopCard = true,
     isHint = false,
+    isJustMoved = false,
     className = '',
 }: CardProps) {
     const color = getCardColor(card);
@@ -76,7 +78,6 @@ export function Card({
                 <div
                     className={`
                         card-base card-transition card-container relative cursor-pointer overflow-hidden
-                        bg-gradient-to-br from-[#0c1231] via-[#05081a] to-[#0c1231]
                         ${isTopCard ? 'card-hoverable' : ''}
                         ${className}
                     `}
@@ -84,33 +85,34 @@ export function Card({
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                     style={{
+                        background: `linear-gradient(135deg, var(--card-back-primary) 0%, var(--card-back-secondary) 50%, var(--card-back-primary) 100%)`,
                         transform: isTopCard ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined
                     }}
                 >
                     {/* Silver Precision Border */}
                     <div className="absolute inset-0 border border-white/10 rounded-[var(--card-radius)] pointer-events-none" />
 
-                    {/* Inner Decorative Silk Frame */}
-                    <div className="absolute inset-[4px] rounded-[6px] border border-[#d4a533]/20 pointer-events-none" />
-                    <div className="absolute inset-[5px] rounded-[5px] border border-[#d4a533]/10 pointer-events-none" />
+                    {/* Inner Decorative Silk Frame - uses theme accent */}
+                    <div className="absolute inset-[4px] rounded-[6px] pointer-events-none" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'color-mix(in srgb, var(--card-back-accent) 20%, transparent)' }} />
+                    <div className="absolute inset-[5px] rounded-[5px] pointer-events-none" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'color-mix(in srgb, var(--card-back-accent) 10%, transparent)' }} />
 
                     {/* Premium Geometric Center Emblem */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
                             {/* Outer Diamond */}
-                            <div className="absolute inset-0 rotate-45 border border-[#d4a533]/40 rounded-sm" />
+                            <div className="absolute inset-0 rotate-45 rounded-sm" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
                             {/* Inner Diamond */}
-                            <div className="absolute inset-2 rotate-45 bg-[#d4a533]/10 border border-[#d4a533]/20" />
+                            <div className="absolute inset-2 rotate-45" style={{ background: 'color-mix(in srgb, var(--card-back-accent) 10%, transparent)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'color-mix(in srgb, var(--card-back-accent) 20%, transparent)' }} />
                             {/* Center Star/Dot */}
-                            <div className="w-2.5 h-2.5 bg-[#d4a533]/60 rounded-full shadow-[0_0_8px_rgba(212,165,51,0.4)]" />
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--card-back-accent) 60%, transparent)', boxShadow: '0 0 8px color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
                         </div>
                     </div>
 
                     {/* Corner Guilloché Accents */}
-                    <div className="absolute top-2 left-2 w-1.5 h-1.5 border-t border-l border-[#d4a533]/40" />
-                    <div className="absolute top-2 right-2 w-1.5 h-1.5 border-t border-r border-[#d4a533]/40" />
-                    <div className="absolute bottom-2 left-2 w-1.5 h-1.5 border-b border-l border-[#d4a533]/40" />
-                    <div className="absolute bottom-2 right-2 w-1.5 h-1.5 border-b border-r border-[#d4a533]/40" />
+                    <div className="absolute top-2 left-2 w-1.5 h-1.5 border-t border-l" style={{ borderColor: 'color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 border-t border-r" style={{ borderColor: 'color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
+                    <div className="absolute bottom-2 left-2 w-1.5 h-1.5 border-b border-l" style={{ borderColor: 'color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
+                    <div className="absolute bottom-2 right-2 w-1.5 h-1.5 border-b border-r" style={{ borderColor: 'color-mix(in srgb, var(--card-back-accent) 40%, transparent)' }} />
 
                     {/* Silk Shimmer Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none opacity-40 mix-blend-overlay" />
@@ -128,6 +130,7 @@ export function Card({
                     overflow-hidden touch-manipulation
                     ${isTopCard ? 'card-hoverable' : ''}
                     ${isHint ? 'ring-4 ring-[#d4a533] ring-offset-4 ring-offset-transparent shadow-[0_0_40px_rgba(212,165,51,0.7)] scale-105 z-50' : ''}
+                    ${isJustMoved ? 'card-place' : ''}
                     ${className}
                 `}
                 onClick={onClick}
@@ -150,20 +153,18 @@ export function Card({
 
                 <div className="absolute inset-0 p-1 sm:p-1.5 pointer-events-none select-none">
                     {/* Top left metadata */}
-                    <div className={`absolute top-1 left-1.5 leading-none ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'} flex flex-col items-center`}>
+                    <div className={`absolute top-1 left-1.5 leading-none ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'}`}>
                         <div className="text-base sm:text-xl font-bold tracking-tight">{rank}</div>
-                        <SuitIcon suit={card.suit} className="w-3.5 h-3.5 mt-0.5" />
                     </div>
 
                     {/* Center focus - Simple Regular Card Pip */}
                     <div className={`absolute inset-0 flex items-center justify-center ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'}`}>
-                        <SuitIcon suit={card.suit} className="w-7 h-7 sm:w-10 sm:h-10 opacity-90" />
+                        <SuitIcon suit={card.suit} className="w-6 h-6 sm:w-8 sm:h-8 opacity-90" />
                     </div>
 
                     {/* Bottom right metadata */}
-                    <div className={`absolute bottom-1 right-1.5 leading-none rotate-180 ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'} flex flex-col items-center`}>
+                    <div className={`absolute bottom-1 right-1.5 leading-none rotate-180 ${isRed ? 'text-[#e11d48]' : 'text-[#111111]'}`}>
                         <div className="text-base sm:text-xl font-bold tracking-tight">{rank}</div>
-                        <SuitIcon suit={card.suit} className="w-3.5 h-3.5 mt-0.5" />
                     </div>
                 </div>
 

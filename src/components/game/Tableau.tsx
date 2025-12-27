@@ -7,6 +7,7 @@ interface TableauProps {
     onCardDoubleClick?: (card: CardType, pileIndex: number, cardIndex: number) => void;
     validDropTargets?: number[];
     isHintCard?: (cardId: string) => boolean;
+    isJustMoved?: (cardId: string) => boolean;
     isDealing?: boolean;
 }
 
@@ -16,6 +17,7 @@ export function Tableau({
     onCardDoubleClick,
     validDropTargets = [],
     isHintCard,
+    isJustMoved,
     isDealing,
 }: TableauProps) {
     return (
@@ -53,6 +55,7 @@ export function Tableau({
                                             card={card}
                                             isTopCard={isTopCard}
                                             isHint={isHintCard?.(card.id) ?? false}
+                                            isJustMoved={isJustMoved?.(card.id) ?? false}
                                             onClick={canInteract ? () => onCardClick?.(card, pileIndex, cardIndex) : undefined}
                                             onDoubleClick={canInteract && isTopCard ? () => onCardDoubleClick?.(card, pileIndex, cardIndex) : undefined}
                                         />

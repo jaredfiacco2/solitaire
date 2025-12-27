@@ -18,8 +18,10 @@ function App() {
     settings,
     hintCard,
     canUndo,
+    lastAutoCompleteCardId,
     drawFromStock,
     smartMove,
+    moveFromFoundation,
     findHint,
     startAutoComplete,
     newGame,
@@ -33,11 +35,17 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [lastMoveSuccess, setLastMoveSuccess] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [lastMovedCardId, setLastMovedCardId] = useState<string | null>(null);
 
   // Handle card tap
   const handleCardTap = (card: CardType, fromType: 'waste' | 'tableau', fromIndex: number, cardsToMove?: CardType[]) => {
     const prevScore = state.score;
     smartMove(card, fromType, fromIndex, cardsToMove);
+
+    // Track the moved card for animation
+    setLastMovedCardId(card.id);
+    setTimeout(() => setLastMovedCardId(null), 350);
+
     setTimeout(() => {
       if (state.score > prevScore) {
         setLastMoveSuccess(true);
@@ -91,6 +99,9 @@ function App() {
 
   // Check if a card is the hint card
   const isHintCard = (cardId: string) => hintCard?.cardId === cardId;
+
+  // Check if a card was just moved (for placement animation)
+  const isJustMoved = (cardId: string) => lastMovedCardId === cardId || lastAutoCompleteCardId === cardId;
 
   // Handle Interactive Lighting
   useEffect(() => {
@@ -174,7 +185,7 @@ function App() {
           <StockWaste
             stock={state.stock}
             waste={state.waste}
-            drawMode={settings.drawMode}
+            drawMode={state.drawMode}
             onStockClick={drawFromStock}
             onWasteCardClick={(card) => handleCardTap(card, 'waste', 0)}
             isHintCard={isHintCard}
@@ -184,7 +195,12 @@ function App() {
 
           <Foundation
             piles={state.foundations}
-            onCardClick={() => { }}
+            onCardClick={(card, pileIndex) => {
+              moveFromFoundation(card, pileIndex);
+              setLastMovedCardId(card.id);
+              setTimeout(() => setLastMovedCardId(null), 350);
+            }}
+            isJustMoved={isJustMoved}
           />
         </div>
 
@@ -197,6 +213,7 @@ function App() {
               handleCardTap(card, 'tableau', pileIndex, cardsToMove);
             }}
             isHintCard={isHintCard}
+            isJustMoved={isJustMoved}
             isDealing={state.isDealing}
           />
         </div>

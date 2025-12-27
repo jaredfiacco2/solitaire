@@ -3,7 +3,7 @@
 @theme {
   --color-table-green: #1a4d2e;
   --color-table-accent: #ffd700;
-  
+
   --color-card-red: #e11d48;
   --color-card-black: #111111;
   --color-card-face: #ffffff;
@@ -23,6 +23,11 @@
   --table-accent: #d4a533;
   --table-glow: rgba(212, 165, 51, 0.4);
 
+  /* Card Back Colors - Midnight (Deep Blue) */
+  --card-back-primary: #0c1231;
+  --card-back-secondary: #05081a;
+  --card-back-accent: #d4a533;
+
   /* Strategic Offsets - Mobile Optimized */
   --tableau-offset-up: 20px;
   --tableau-offset-down: 6px;
@@ -41,12 +46,22 @@
   --table-felt: #062214;
   --table-accent: #34d399;
   --table-glow: rgba(52, 211, 153, 0.4);
+
+  /* Card Back Colors - Emerald (Rich Green) */
+  --card-back-primary: #0a3320;
+  --card-back-secondary: #052211;
+  --card-back-accent: #34d399;
 }
 
 .theme-amethyst {
   --table-felt: #1a0c2e;
   --table-accent: #a78bfa;
   --table-glow: rgba(167, 139, 250, 0.4);
+
+  /* Card Back Colors - Amethyst (Deep Purple) */
+  --card-back-primary: #2a1052;
+  --card-back-secondary: #150830;
+  --card-back-accent: #a78bfa;
 }
 
 /* Responsive card sizing */
@@ -217,10 +232,10 @@ body,
   border-radius: var(--card-radius);
   background-color: var(--color-card-face);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  
+
   transition: transform 0.3s var(--ease-imperial);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   transform-style: preserve-3d;
   will-change: transform;
   backface-visibility: hidden;
@@ -241,8 +256,8 @@ body,
 /* Regular Blue Card Back */
 .card-base:not(.card-face-material) {
   background-color: #2563eb;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 100%),
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 100%),
     url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h6v6H0V0zm6 6h6v6H6V6z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
   border: 2px solid white;
 }
@@ -330,7 +345,7 @@ body,
 }
 
 .card-place {
-  animation: cardPlace 0.2s var(--ease-bounce);
+  animation: cardPlace 0.4s var(--ease-bounce);
 }
 
 /* Foundation pulse */
@@ -504,6 +519,23 @@ body,
 
 .animate-fly-in {
   animation: fly-in 0.8s var(--ease-imperial) both;
+}
+
+/* Flying card between piles animation */
+@keyframes fly-card {
+  0% {
+    transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(calc(var(--fly-x) * 0.5)) translateY(calc(var(--fly-y) * 0.5 - 30px)) scale(1.1) rotate(5deg);
+  }
+
+  100% {
+    transform: translateX(var(--fly-x)) translateY(var(--fly-y)) scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes flash-success {

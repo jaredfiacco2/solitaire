@@ -73,6 +73,7 @@ export function useGameState() {
     const [hintCard, setHintCard] = useState<{ cardId: string; destination: string } | null>(null);
     const autoCompleteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [history, setHistory] = useState<GameState[]>([]);
+    const [lastAutoCompleteCardId, setLastAutoCompleteCardId] = useState<string | null>(null);
     const MAX_UNDO = 20;
 
     // Save current state to history before making changes
@@ -334,7 +335,11 @@ export function useGameState() {
                         newState.moves = prev.moves + 1;
                         newState.score = prev.score + POINTS.WASTE_TO_FOUNDATION;
 
-                        autoCompleteRef.current = setTimeout(autoCompleteStep, 100);
+                        // Track the card for animation
+                        setLastAutoCompleteCardId(card.id);
+                        setTimeout(() => setLastAutoCompleteCardId(null), 320);
+
+                        autoCompleteRef.current = setTimeout(autoCompleteStep, 350);
                         return newState;
                     }
                 }
@@ -355,7 +360,11 @@ export function useGameState() {
                         newState.moves = prev.moves + 1;
                         newState.score = prev.score + POINTS.TABLEAU_TO_FOUNDATION;
 
-                        autoCompleteRef.current = setTimeout(autoCompleteStep, 100);
+                        // Track the card for animation
+                        setLastAutoCompleteCardId(card.id);
+                        setTimeout(() => setLastAutoCompleteCardId(null), 320);
+
+                        autoCompleteRef.current = setTimeout(autoCompleteStep, 350);
                         return newState;
                     }
                 }
@@ -403,6 +412,43 @@ export function useGameState() {
         }
     }, [hintCard]);
 
+    // Move card from foundation to tableau
+    const moveFromFoundation = useCallback((card: Card, foundationIndex: number) => {
+        setHintCard(null);
+
+        setState(prev => {
+            saveToHistory(prev);
+
+            const tableauIndex = findValidTableauDestination(card, prev);
+            if (tableauIndex === -1) {
+                // No valid move, combo resets
+                return { ...prev, comboMultiplier: 1 };
+            }
+
+            startTimer();
+            const newState = { ...prev };
+
+            // Remove from foundation
+            newState.foundations = [...prev.foundations];
+            newState.foundations[foundationIndex] = prev.foundations[foundationIndex].slice(0, -1);
+
+            // Add to tableau
+            newState.tableau = [...prev.tableau];
+            newState.tableau[tableauIndex] = [...prev.tableau[tableauIndex], card];
+            newState.moves = prev.moves + 1;
+            // No points scored for moving back from foundation (neutral move)
+            newState.canAutoComplete = canAutoComplete(newState);
+            newState.isStuck = !hasAnyValidMove(newState);
+
+            if (settings.soundEnabled) {
+                playCardPlace();
+                if (settings.hapticEnabled) triggerHaptic('light');
+            }
+
+            return newState;
+        });
+    }, [startTimer, settings, saveToHistory]);
+
     // Undo last action
     const undo = useCallback(() => {
         if (history.length === 0 || state.isAutoCompleting) return;
@@ -423,8 +469,10 @@ export function useGameState() {
         settings,
         hintCard,
         canUndo: history.length > 0,
+        lastAutoCompleteCardId,
         drawFromStock,
         smartMove,
+        moveFromFoundation,
         undo,
         newGame,
         updateSettings,

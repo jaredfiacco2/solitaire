@@ -5,6 +5,7 @@ interface FoundationProps {
     piles: [CardType[], CardType[], CardType[], CardType[]];
     onCardClick?: (card: CardType, pileIndex: number) => void;
     validDropTargets?: number[];
+    isJustMoved?: (cardId: string) => boolean;
 }
 
 const SUIT_HINTS: Suit[] = ['spades', 'hearts', 'clubs', 'diamonds'];
@@ -13,6 +14,7 @@ export function Foundation({
     piles,
     onCardClick,
     validDropTargets = [],
+    isJustMoved,
 }: FoundationProps) {
     return (
         <div className="flex gap-2 sm:gap-3">
@@ -30,6 +32,7 @@ export function Foundation({
                                 card={pile[pile.length - 1]}
                                 onClick={() => onCardClick?.(pile[pile.length - 1], index)}
                                 isTopCard
+                                isJustMoved={isJustMoved?.(pile[pile.length - 1].id) ?? false}
                             />
                             {/* Imperial Progression Badge */}
                             <div className="absolute -bottom-2 -right-2 min-w-[20px] h-5 px-1 bg-gradient-to-br from-[#d4a533] to-[#b8860b] text-black text-[9px] font-bold rounded-full flex items-center justify-center shadow-[0_4px_8px_rgba(212,165,51,0.3)] border border-white/20 select-none">
